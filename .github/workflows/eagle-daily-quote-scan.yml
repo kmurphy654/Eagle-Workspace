@@ -82,12 +82,41 @@ jobs:
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
-            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1. Then send one PushNotification with a brief count of results.
+            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1.
+
+            STEP 6 — EMAIL SUMMARY: Use Bash to send a summary email via Gmail SMTP.
+            Compose a plain-text email with:
+              To: kmurphy654@gmail.com
+              From: eagle82nd@gmail.com
+              Subject: Eagle Daily Quote Scan complete — <TODAY_DATE>
+              Body: A brief plain-text summary of what was done, including:
+                - counts for each bucket (auto-quotes, add-a-fan, Bryan, needs info, aged out, skipped)
+                - names and addresses of any auto-quote drafts created (ready to review in Gmail)
+                - any aged-out leads
+                - note if iMessage check was skipped
+            Send using curl with Gmail SMTP:
+              curl --ssl-reqd \
+                --url "smtps://smtp.gmail.com:465" \
+                --user "eagle82nd@gmail.com:$EAGLE_GMAIL_APP_PASSWORD" \
+                --mail-from "eagle82nd@gmail.com" \
+                --mail-rcpt "kmurphy654@gmail.com" \
+                --upload-file /tmp/summary_email.txt
+            Write the email content (with headers) to /tmp/summary_email.txt before sending.
+            The email file must start with:
+              From: eagle82nd@gmail.com
+              To: kmurphy654@gmail.com
+              Subject: Eagle Daily Quote Scan complete — <TODAY_DATE>
+              (blank line)
+              (body text)
+
+            Then send one PushNotification with a brief count of results.
 
             ABSOLUTE RULES:
-            - NEVER send any email. Only create drafts, apply labels, and write the summary.
+            - NEVER send any email to customers. Only create drafts for customer emails.
+            - The summary email to kmurphy654@gmail.com is the only email that may be sent.
             - The three PDF attachments (proposal, warranty, external sheet) MUST be attached to every auto-quote draft — do not skip PDF generation.
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
           DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
+          EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
