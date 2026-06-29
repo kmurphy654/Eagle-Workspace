@@ -1,0 +1,57 @@
+name: Eagle Daily Quote Scan
+
+on:
+  schedule:
+    # 7:03 AM EST (12:03 UTC) weekdays — fires ~8:03 AM during EDT months
+    - cron: '3 12 * * 1-5'
+  workflow_dispatch:
+    # Also allows manual trigger from the GitHub Actions tab
+
+jobs:
+  quote-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Eagle Daily Quote Scan
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          prompt: |
+            Run the Eagle Environmental DAILY QUOTE SCAN for eagle82nd@gmail.com.
+
+            Today's date: use the current system date.
+
+            STEP 1 — GATHER: Search Gmail for all threads from webadmin@radonremover.com in the inbox.
+
+            STEP 2 — SKIP: Any thread already carrying Label_22, Label_23, Label_24, Label_25, or Label_26 is already processed — skip it entirely.
+
+            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): For each remaining thread, search the eagle82nd Google Calendar (wide window — 90 days back through 180 days forward) by the homeowner's PHONE NUMBER, STREET NAME, and FIRST NAME using mcp__Google_Calendar__list_events with fullText. If any match is found, skip that lead entirely — it is already in the pipeline. List skipped leads in the summary under "Already on calendar — skipped."
+
+            STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
+
+            STEP 3 — CLASSIFY each remaining thread into one of:
+            - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
+            - ADD-A-FAN: existing passive radon pipe present, just needs a fan added.
+            - NEEDS INFO: missing critical information (no street address, unclear foundation type, etc.).
+            - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
+            - AGED OUT: no reply in 14+ days from submission date.
+
+            STEP 4 — ACT:
+            - CLEAN AUTO-QUOTE: Create a Gmail draft addressed TO the customer's email (not a reply to webadmin). Include fan model, pipe size, price, and any relevant notes (sump, radon below action level, RE transaction timeline, etc.). Apply Label_25 ("Auto-quote ready (review)") to the thread.
+            - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
+            - All others: list only in summary, no draft.
+
+            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1. Then send one PushNotification with a brief count of results.
+
+            ABSOLUTE RULES:
+            - NEVER send any email. Only create drafts, apply labels, and write the summary.
+            - PDF generation (make_proposal.py / make_warranty.py) is not available in this environment — note in summary that PDFs require manual generation on the local Mac.
+        env:
+          # MCP server configs are injected via environment — see repo secrets setup guide in README
+          GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
+          GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
