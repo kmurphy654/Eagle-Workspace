@@ -24,6 +24,7 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
           mode: agent
           allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,mcp__Dropbox__download_link,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
           direct_prompt: |
@@ -76,7 +77,7 @@ jobs:
                 - external_LASTNAME.pdf (mimeType: application/pdf)
               Apply Label_25 ("Auto-quote ready (review)") to the thread.
               Record each quote in pending-quotes.json (create or append) with fields:
-                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, central, draft_sent: false
+                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false
 
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
