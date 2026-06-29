@@ -82,13 +82,32 @@ jobs:
 
             STEP 4 — SAVE AND NOTIFY: Write the updated pending-quotes.json back to the repo.
             Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1.
-            If any files were uploaded, send a PushNotification listing which addresses
-            were synced to Dropbox (Proposal + Warranty for each).
+
+            STEP 5 — EMAIL SUMMARY: Use Bash to send a summary email via Gmail SMTP.
+            Write the email to /tmp/sync_summary_email.txt with headers then body:
+              From: eagle82nd@gmail.com
+              To: kmurphy654@gmail.com
+              Subject: Eagle Post-Send Sync complete — <TODAY_DATE>
+              (blank line)
+              If files were synced: list each address synced with Proposal and Warranty filenames.
+              If nothing to sync: "No pending quotes were found sent today. Nothing to sync."
+            Send with:
+              curl --ssl-reqd \
+                --url "smtps://smtp.gmail.com:465" \
+                --user "eagle82nd@gmail.com:$EAGLE_GMAIL_APP_PASSWORD" \
+                --mail-from "eagle82nd@gmail.com" \
+                --mail-rcpt "kmurphy654@gmail.com" \
+                --upload-file /tmp/sync_summary_email.txt
+
+            If any files were uploaded, also send a PushNotification listing which addresses
+            were synced to Dropbox.
 
             ABSOLUTE RULES:
-            - NEVER send any email.
+            - NEVER send any email to customers.
             - Only read Gmail Sent — do not modify labels or anything in Gmail here.
             - Only upload files to /_A-Z forms/ in Dropbox — do not modify other Dropbox files.
+            - The only permitted outbound email is the summary to kmurphy654@gmail.com.
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
+          EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
