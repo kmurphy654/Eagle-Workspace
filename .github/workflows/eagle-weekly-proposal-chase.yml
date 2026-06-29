@@ -1,0 +1,132 @@
+name: Eagle Weekly Open-Proposal Chase
+
+on:
+  schedule:
+    # Monday 8:03 AM EST (13:03 UTC)
+    - cron: '3 13 * * 1'
+  workflow_dispatch:
+
+jobs:
+  proposal-chase:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Eagle Weekly Open-Proposal Chase
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mode: agent
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,mcp__Dropbox__search,mcp__Dropbox__list_folder,mcp__Dropbox__create_file,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          direct_prompt: |
+            Run Eagle Environmental's WEEKLY OPEN-PROPOSAL CHASE for eagle82nd@gmail.com.
+            Goal: find customers who received a radon proposal but have NOT scheduled an install,
+            and create a DRAFT follow-up email for each (for Kevin/Renee to review and send).
+            ABSOLUTE RULE: NEVER send any email — only create drafts and a summary.
+            Use today's actual date as the run date (RUN_DATE).
+
+            CALENDAR FORMAT (eagle82nd board): event titles follow the pattern
+            "<Tech> <Code> <Town> <Street> ... HO <FirstName> <Phone> ..."
+            Codes: D = estimate/quote visit (also "RFQ"); J = job/install; S = service.
+            Bryan and Vince do estimates.
+
+            STEP 1 — ESTIMATES IN WINDOW.
+            Use mcp__Google_Calendar__list_events on the eagle82nd calendar to find D events
+            (estimate/quote visits) by Bryan or Vince dated between (RUN_DATE - 28 days) and
+            (RUN_DATE - 7 days). For each event capture:
+              first_name, street, town, phone, estimate_date, email (if present in the event).
+
+            STEP 2 — DROP SCHEDULED.
+            Use mcp__Google_Calendar__list_events to find J (install) events from
+            (RUN_DATE - 60 days) through (RUN_DATE + 180 days).
+            Drop any estimate that has a matching J install — match by PHONE first, then
+            street + first_name. Also drop any estimate whose event note contains
+            "confirmed with check" or "holding <date> for install".
+            Keep track of dropped leads for the summary.
+
+            STEP 3 — CONFIRM PROPOSAL DELIVERED.
+            For each remaining estimate, search Dropbox for a proposal PDF using
+            mcp__Dropbox__search with query "<street> P <town>" (e.g. "Main St 105 P Townsend")
+            and file_extensions: ["pdf"]. Also try searching just "<street> <town> proposal".
+            Dropbox folders follow various patterns: "/{Town}", "/{Town} Proposals",
+            "/{Town} proposals" — search broadly, not just in one folder.
+            If a file with "P" in the name matching the street is found → confirmed.
+            If only a "D" file or nothing is found → mark "proposal not found — verify"
+            and EXCLUDE from drafts (add to proposal-not-found list).
+
+            STEP 4 — AVOID DOUBLE-CONTACT (email AND text).
+            For each confirmed open proposal, check both channels:
+            (a) EMAIL: use mcp__Gmail__search_threads to search Gmail in:sent for their email
+                address with subject containing "Checking in on your radon proposal" OR
+                "still interested in a radon quote" OR "Following up on radon". If a sent
+                message exists within the last 14 days, mark as recently contacted by email.
+            (b) TEXT: If iMessage/Messages MCP tools are available in this environment,
+                search Messages for the customer's PHONE NUMBER for any message sent or received
+                in the last 14 days. A recent exchange either direction counts as contacted.
+                If iMessage is not available, note "iMessage check skipped — not available
+                in this environment" in the summary and proceed with email check only.
+            If (a) OR (b) is true, drop from drafts and list under "skipped — recently contacted"
+            with the channel (email or text).
+
+            STEP 5 — GET EMAILS.
+            For each remaining open proposal, find the customer's email address:
+            - Use the calendar event email if present.
+            - Else search Gmail using mcp__Gmail__search_threads for their web-form RFQ
+              (from:webadmin@radonremover.com, searching by name, phone, or street) and read
+              the E-Mail field from the thread.
+            - If no email can be found, add to CALL LIST (no draft created).
+
+            STEP 6 — CREATE DRAFTS.
+            For each open proposal WITH a confirmed email, create a Gmail draft using
+            mcp__Gmail__create_draft addressed to that customer.
+            Subject: "Checking in on your radon proposal for <Street>, <Town>"
+            Body (warm, brief):
+              Hi <FirstName>,
+
+              I wanted to reach out and check in on the radon mitigation proposal we provided
+              for <Street>, <Town>. We hope you had a chance to review it — please let us know
+              if you have any questions or if you'd like to move forward and get on our schedule.
+
+              We're happy to answer any questions or walk you through the process. Feel free to
+              give us a call at 508-393-7633 or simply reply to this email.
+
+              Best regards,
+              Kevin Murphy
+              Eagle Environmental, Inc.
+              508-393-7633
+
+            Do NOT send. Draft only.
+
+            STEP 7 — SUMMARY + NOTIFY.
+            Write the summary to TWO places:
+
+            (a) Repo file: open-proposals/SUMMARY-<RUN_DATE>.md
+                Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1.
+
+            (b) Dropbox file via mcp__Dropbox__create_file:
+                path: /Open Proposals/SUMMARY-<RUN_DATE>.md
+                (The /Open Proposals/ folder will be created automatically if needed.)
+
+            Summary must include:
+              - Run date and counts: estimates in window, dropped-scheduled, dropped-recently-contacted,
+                proposal-not-found, call-list count, drafts created
+              - DRAFTS CREATED table: name | street | town | email
+              - CALL LIST: name | street | town | phone (no email on file)
+              - PROPOSAL NOT FOUND list (for audit): name | street | town
+              - SKIPPED — RECENTLY CONTACTED list: name | street | town | channel (email/text)
+              - DROPPED — ALREADY SCHEDULED list: name | street | town
+
+            Then send ONE PushNotification (under 200 chars), e.g.:
+            "Eagle weekly chase <RUN_DATE>: N follow-up drafts ready, M to call. See open-proposals/SUMMARY-<RUN_DATE>.md"
+
+            FALLBACK: If Gmail, Calendar, or Dropbox is unavailable, do what you can,
+            note it clearly in the summary, and still send the PushNotification.
+            NEVER send any email under any circumstances.
+        env:
+          GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
+          GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
+          DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
