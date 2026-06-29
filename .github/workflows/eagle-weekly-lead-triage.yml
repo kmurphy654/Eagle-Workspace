@@ -1,0 +1,116 @@
+name: Eagle Weekly Radon Lead Triage
+
+on:
+  schedule:
+    # Monday 7:03 AM EST (12:03 UTC)
+    - cron: '3 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  lead-triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Eagle Weekly Radon Lead Triage
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          mode: agent
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Google_Calendar__list_events,PushNotification,Read,Write,Edit,Glob,Grep"
+          direct_prompt: |
+            Run Eagle Environmental's WEEKLY RADON LEAD TRIAGE for eagle82nd@gmail.com.
+            Use today's actual date as the run date (RUN_DATE).
+            You are a cloud agent with Gmail and Google Calendar connectors and NO access
+            to any local files or Messages. Do only the email and calendar work described here.
+
+            SOURCE A - Gmail RFQ emails (last 15 days)
+            Search Gmail for: from:webadmin@radonremover.com subject:"Request For Quote" newer_than:15d
+            Paginate fully using mcp__Gmail__search_threads, following the page token until
+            exhausted. For each thread, use mcp__Gmail__get_thread to read the message body.
+            Capture for each lead:
+              - first name, last name
+              - phone number (10 digits, strip a leading US country code 1)
+              - street address
+              - town
+              - request date (the date the form was submitted)
+              - the lead's personal email address (from the message body, NOT webadmin@radonremover.com)
+
+            SOURCE B - Google Calendar (primary calendar)
+            Use mcp__Google_Calendar__list_events to list ALL events from 90 days ago through
+            180 days ahead. Paginate completely by following nextPageToken until exhausted;
+            expect several hundred events. Build an index with per event:
+              - start date
+              - every 10-digit phone number found in the summary, description, or location
+                (digits only, strip a leading US country code 1)
+              - the summary text
+
+            RECONCILE - Drop already-scheduled leads
+            For each RFQ lead, check if a calendar event already exists. Match by:
+              1. Phone first: exact 10-digit match between lead phone and any phone in the event.
+              2. Street plus name if no phone match: extract the key street name word (NOT
+                 directional prefixes like N/S/E/W or suffixes like St/Rd/Dr/Ln/Ave/Ct/Way/Blvd).
+                 For example "7 W Ferdinand St" must match on "Ferdinand", not "W". A match
+                 on the directional prefix alone ("W", "N", etc.) is a false positive and must
+                 be rejected. Also match the first or last name.
+              3. Reject any street+name match where the calendar event date is BEFORE the
+                 lead's request date.
+            Leads with no calendar match are UNSCHEDULED.
+
+            CONTACT STATUS (email channel only)
+            For each unscheduled lead, search the eagle82nd Sent folder using
+            mcp__Gmail__search_threads with query "in:sent to:<lead's personal email>".
+            Categorize each unscheduled lead as one of:
+              - No email contact: no outbound message found to their address
+              - Emailed: at least one sent message found
+              - Effectively booked by email: sent message appears to confirm an appointment
+                or schedule a visit (note: calendar may not be updated yet)
+              - Effectively declined by email: sent message indicates not pursuing
+                (flag these for calendar cleanup)
+
+            REPORT
+            Write the report to: lead-triage/TRIAGE-<RUN_DATE>.md
+            Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1.
+
+            The report must include:
+
+            1. Run date and source window (last 15 days of web-form RFQ leads).
+
+            2. Summary counts:
+               - Total RFQ leads found in window
+               - Already scheduled (dropped)
+               - Unscheduled leads remaining
+
+            3. Table of all unscheduled leads:
+               Columns: Request Date, Name, Street/Town, Phone, Email, Email Contact Status
+
+            4. Sections:
+               - NO EMAIL CONTACT: leads with no outbound email at all (highest priority)
+               - EMAILED: leads who have received at least one email
+               - EFFECTIVELY BOOKED BY EMAIL (calendar not updated): list name, street, town
+               - EFFECTIVELY DECLINED BY EMAIL: list name, street, town
+
+            5. Footer note (exact text):
+               "This report covers web-form (email) leads only. Text-message leads and the
+               lingering-text sweep are handled separately by a local run on the office Mac."
+
+            FORMATTING RULES:
+            - Use commas, semicolons, or periods only. No em dashes anywhere in the report.
+            - Use plain Markdown tables. No special characters in table cells that could
+              break rendering.
+
+            Then send ONE PushNotification (under 200 chars), e.g.:
+            "Eagle lead triage <RUN_DATE>: N unscheduled leads, M with no email contact. See lead-triage/TRIAGE-<RUN_DATE>.md"
+
+            ABSOLUTE RULES:
+            - NEVER send any email.
+            - NEVER create any Gmail drafts.
+            - Only read Gmail and Calendar; write only the report file to the repo.
+        env:
+          GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
+          GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
