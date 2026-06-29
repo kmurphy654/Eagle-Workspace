@@ -27,7 +27,7 @@ jobs:
             Run Eagle Environmental's WEEKLY OPEN-PROPOSAL CHASE for eagle82nd@gmail.com.
             Goal: find customers who received a radon proposal but have NOT scheduled an install,
             and create a DRAFT follow-up email for each (for Kevin/Renee to review and send).
-            ABSOLUTE RULE: NEVER send any email — only create drafts and a summary.
+            ABSOLUTE RULE: NEVER send any email to customers — only create drafts and a summary.
             Use today's actual date as the run date (RUN_DATE).
 
             CALENDAR FORMAT (eagle82nd board): event titles follow the pattern
@@ -121,13 +121,30 @@ jobs:
               - SKIPPED — RECENTLY CONTACTED list: name | street | town | channel (email/text)
               - DROPPED — ALREADY SCHEDULED list: name | street | town
 
-            Then send ONE PushNotification (under 200 chars), e.g.:
-            "Eagle weekly chase <RUN_DATE>: N follow-up drafts ready, M to call. See open-proposals/SUMMARY-<RUN_DATE>.md"
+            STEP 8 — EMAIL SUMMARY.
+            Use Bash to send a summary email via Gmail SMTP.
+            Write the email to /tmp/chase_summary_email.txt with headers then body:
+              From: eagle82nd@gmail.com
+              To: kmurphy654@gmail.com
+              Subject: Eagle Weekly Proposal Chase complete — <RUN_DATE>
+              (blank line)
+              Plain-text summary: counts, list of drafts created (name, street, town),
+              call list, proposal-not-found list. Keep it concise.
+            Send with:
+              curl --ssl-reqd \
+                --url "smtps://smtp.gmail.com:465" \
+                --user "eagle82nd@gmail.com:$EAGLE_GMAIL_APP_PASSWORD" \
+                --mail-from "eagle82nd@gmail.com" \
+                --mail-rcpt "kmurphy654@gmail.com" \
+                --upload-file /tmp/chase_summary_email.txt
+
+            Then send ONE PushNotification (under 200 chars).
 
             FALLBACK: If Gmail, Calendar, or Dropbox is unavailable, do what you can,
             note it clearly in the summary, and still send the PushNotification.
-            NEVER send any email under any circumstances.
+            NEVER send any email to customers under any circumstances.
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
           DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
+          EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
