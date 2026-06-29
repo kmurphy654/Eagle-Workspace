@@ -22,7 +22,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           model: claude-sonnet-4-6
           mode: agent
-          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Google_Calendar__list_events,PushNotification,Read,Write,Edit,Glob,Grep"
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Google_Calendar__list_events,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
           direct_prompt: |
             Run Eagle Environmental's WEEKLY RADON LEAD TRIAGE for eagle82nd@gmail.com.
             Use today's actual date as the run date (RUN_DATE).
@@ -104,13 +104,33 @@ jobs:
             - Use plain Markdown tables. No special characters in table cells that could
               break rendering.
 
+            EMAIL SUMMARY
+            Use Bash to send a summary email via Gmail SMTP.
+            Write the email to /tmp/triage_summary_email.txt with headers then body:
+              From: eagle82nd@gmail.com
+              To: kmurphy654@gmail.com
+              Subject: Eagle Lead Triage complete — <RUN_DATE>
+              (blank line)
+              Plain-text summary: counts (total leads, scheduled, unscheduled), then list
+              each unscheduled lead with name, street, town, phone, and email contact status.
+              End with the note: "Full report saved to lead-triage/TRIAGE-<RUN_DATE>.md"
+            Send with:
+              curl --ssl-reqd \
+                --url "smtps://smtp.gmail.com:465" \
+                --user "eagle82nd@gmail.com:$EAGLE_GMAIL_APP_PASSWORD" \
+                --mail-from "eagle82nd@gmail.com" \
+                --mail-rcpt "kmurphy654@gmail.com" \
+                --upload-file /tmp/triage_summary_email.txt
+
             Then send ONE PushNotification (under 200 chars), e.g.:
             "Eagle lead triage <RUN_DATE>: N unscheduled leads, M with no email contact. See lead-triage/TRIAGE-<RUN_DATE>.md"
 
             ABSOLUTE RULES:
-            - NEVER send any email.
+            - NEVER send any email to customers.
             - NEVER create any Gmail drafts.
             - Only read Gmail and Calendar; write only the report file to the repo.
+            - The only permitted outbound email is the summary to kmurphy654@gmail.com.
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
+          EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
