@@ -1,0 +1,81 @@
+name: Eagle Post-Send Dropbox Sync
+
+on:
+  schedule:
+    # 5:03 PM EST (22:03 UTC) weekdays — catches anything sent during the day
+    - cron: '3 22 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  post-send-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PDF generation dependencies
+        run: pip install pypdfium2 reportlab pypdf
+
+      - name: Run Eagle Post-Send Dropbox Sync
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Dropbox__download_link,mcp__Dropbox__create_file,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          direct_prompt: |
+            Run the Eagle Environmental POST-SEND DROPBOX SYNC for eagle82nd@gmail.com.
+
+            Today's date: use the current system date.
+
+            PURPOSE: After Kevin reviews and sends an auto-quote draft, this job detects the
+            sent email and saves the warranty PDF to Dropbox with the correct filename.
+
+            STEP 1 — LOAD PENDING: Read pending-quotes.json from the repo. This file contains
+            entries for all auto-quotes that were drafted but not yet confirmed sent.
+            If the file is missing or empty, log "No pending quotes — nothing to do" and stop.
+
+            STEP 2 — CHECK SENT MAIL: For each entry in pending-quotes.json where draft_sent is false,
+            search Gmail for sent messages to that customer's email address (search in sent:
+            label or use "to:<email> in:sent"). If a matching sent message is found that was
+            sent AFTER the date_quoted field, that draft has been sent by Kevin.
+
+            STEP 3 — GENERATE WARRANTY PDF AND SAVE TO DROPBOX: For each newly-confirmed-sent quote:
+
+              a) Download templates from Dropbox using mcp__Dropbox__download_link:
+                 - "/_A-Z forms/4 Warranty.pdf"                    → /tmp/warranty_template.pdf
+                 - "/_A-Z forms/External Radon System Sheet.pdf"   → /tmp/external_template.pdf
+                 Download each using: curl -L -o <dest> "<download_url>"
+
+              b) Generate the warranty PDF using Bash:
+                 python eagle-tools/make_warranty.py \
+                   --addr "STREET_ADDR, TOWN, MA" \
+                   --template-warranty /tmp/warranty_template.pdf \
+                   --template-external /tmp/external_template.pdf \
+                   --out-warranty /tmp/warranty_out.pdf \
+                   --out-external /tmp/external_out.pdf
+
+              c) Build the Dropbox filename using this format:
+                 {StreetName(CamelCase)}{Number}W{town(lowercase, no spaces)}.pdf
+                 Examples: MainSt105Wtownsend.pdf, RedBridgeLn33Wsouthhadley.pdf
+
+              d) Upload the warranty PDF to Dropbox path:
+                 /_A-Z forms/{filename}
+                 Use mcp__Dropbox__create_file with the base64-encoded PDF content.
+                 Read the file with Bash: base64 -w0 /tmp/warranty_out.pdf
+
+              e) Mark draft_sent: true and record sent_date and dropbox_path in pending-quotes.json.
+
+            STEP 4 — SAVE AND NOTIFY: Write the updated pending-quotes.json back to the repo.
+            Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1.
+            If any warranties were uploaded, send a PushNotification summarizing which
+            addresses were synced to Dropbox.
+
+            ABSOLUTE RULES:
+            - NEVER send any email.
+            - Only read Gmail Sent — do not modify or label anything in Gmail here.
+            - Only upload warranty PDFs to /_A-Z forms/ in Dropbox — do not modify other files.
+        env:
+          GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
+          DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
