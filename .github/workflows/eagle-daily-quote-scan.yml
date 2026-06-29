@@ -17,15 +17,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install PDF generation dependencies
+        run: pip install pypdfium2 reportlab pypdf
+
       - name: Run Eagle Daily Quote Scan
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,mcp__Dropbox__download_link,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
           direct_prompt: |
             Run the Eagle Environmental DAILY QUOTE SCAN for eagle82nd@gmail.com.
 
             Today's date: use the current system date.
+
+            STEP 0 — SETUP: Download the three PDF templates from Dropbox using mcp__Dropbox__download_link, then curl each download_url to save locally:
+              - "/_A-Z forms/Blank with signature.pdf" → /tmp/blank_sig.pdf
+              - "/_A-Z forms/4 Warranty.pdf"           → /tmp/warranty_template.pdf
+              - "/_A-Z forms/External Radon System Sheet.pdf" → /tmp/external_template.pdf
+            Use Bash to curl each URL: curl -L -o /tmp/blank_sig.pdf "<url>" (etc.)
+            These templates are needed to generate PDFs for each auto-quote.
 
             STEP 1 — GATHER: Search Gmail for all threads from webadmin@radonremover.com in the inbox.
 
@@ -43,16 +53,39 @@ jobs:
             - AGED OUT: no reply in 14+ days from submission date.
 
             STEP 4 — ACT:
-            - CLEAN AUTO-QUOTE: Create a Gmail draft addressed TO the customer's email (not a reply to webadmin). Include fan model, pipe size, price, and any relevant notes (sump, radon below action level, RE transaction timeline, etc.). Apply Label_25 ("Auto-quote ready (review)") to the thread.
+            - CLEAN AUTO-QUOTE: For each lead, generate the three PDFs using Bash:
+                python eagle-tools/make_proposal.py \
+                  --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
+                  --pipe PIPE_SIZE --fan FAN_MODEL --price PRICE --date TODAY_DATE \
+                  --template /tmp/blank_sig.pdf \
+                  --out /tmp/proposal_LASTNAME.pdf \
+                  [--central if applicable]
+                python eagle-tools/make_warranty.py \
+                  --addr "STREET ADDRESS, TOWN, MA" \
+                  --template-warranty /tmp/warranty_template.pdf \
+                  --template-external /tmp/external_template.pdf \
+                  --out-warranty /tmp/warranty_LASTNAME.pdf \
+                  --out-external /tmp/external_LASTNAME.pdf
+              Then read each output PDF with Bash (base64 -w0) to get the base64 content.
+              Create a Gmail draft addressed TO the customer's email (not a reply to webadmin).
+              Include fan model, pipe size, price, and any relevant notes in the body.
+              Attach all three PDFs using the attachments field:
+                - proposal_LASTNAME.pdf (mimeType: application/pdf)
+                - warranty_LASTNAME.pdf (mimeType: application/pdf)
+                - external_LASTNAME.pdf (mimeType: application/pdf)
+              Apply Label_25 ("Auto-quote ready (review)") to the thread.
+              Record each quote in pending-quotes.json (create or append) with fields:
+                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, central, draft_sent: false
+
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
-            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push to branch claude/eagle-daily-quote-scan-8kp0b1. Then send one PushNotification with a brief count of results.
+            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1. Then send one PushNotification with a brief count of results.
 
             ABSOLUTE RULES:
             - NEVER send any email. Only create drafts, apply labels, and write the summary.
-            - PDF generation (make_proposal.py / make_warranty.py) is not available in this environment — note in summary that PDFs require manual generation on the local Mac.
+            - The three PDF attachments (proposal, warranty, external sheet) MUST be attached to every auto-quote draft — do not skip PDF generation.
         env:
-          # MCP server configs are injected via environment — see repo secrets setup guide in README
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
+          DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
