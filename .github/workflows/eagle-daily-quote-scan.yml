@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +22,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
-          prompt: |
+          direct_prompt: |
             Run the Eagle Environmental DAILY QUOTE SCAN for eagle82nd@gmail.com.
 
             Today's date: use the current system date.
