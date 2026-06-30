@@ -163,7 +163,7 @@
         <button class="mic-btn" id="mic_btn" onclick="toggleMic()" title="Tap to speak">🎤</button>
       </div>
     </div>
-    <button class="btn btn-quick" onclick="parseAndSubmit()">Parse &amp; Create Draft</button>
+    <button class="btn btn-quick" onclick="parseAndFill()">Parse</button>
     <div id="parsed_preview" class="parsed-preview"></div>
   </div>
 
@@ -342,43 +342,61 @@
       return result;
     }
 
-    function parseAndSubmit() {
+    let _parsedData = null;
+
+    function parseAndFill() {
       const text = document.getElementById('quick_text').value.trim();
       if (!text) { showStatus('Please say or type the quote details first.', 'error'); return; }
 
-      const parsed = parseQuickText(text);
+      _parsedData = parseQuickText(text);
 
-      // Show preview
+      // Fill manual fields
+      Object.keys(_parsedData).forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = _parsedData[k];
+      });
+
+      const missing = ['customer_name','customer_email','street_address','town','year_built']
+        .filter(k => !_parsedData[k]);
+
+      const warrantyVal = document.getElementById('warranty_type').value;
+      const warrantyLabel = document.getElementById('warranty_type').options[document.getElementById('warranty_type').selectedIndex].text;
+
       const preview = document.getElementById('parsed_preview');
       preview.style.display = 'block';
       preview.innerHTML = `
-        <strong>Name:</strong> ${parsed.customer_name || '⚠ missing'}<br>
-        <strong>Email:</strong> ${parsed.customer_email || '⚠ missing'}<br>
-        <strong>Address:</strong> ${parsed.street_address || '⚠ missing'}<br>
-        <strong>Town:</strong> ${parsed.town || '⚠ missing'}<br>
-        <strong>Year Built:</strong> ${parsed.year_built || '⚠ missing'}<br>
-        <strong>Sq Ft:</strong> ${parsed.sqft || 'not specified'}<br>
-        <strong>Radon:</strong> ${parsed.radon_level || 'not specified'} pCi/L<br>
-        <strong>Garage above:</strong> ${parsed.central_flag}
+        <strong>Name:</strong> ${_parsedData.customer_name || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Email:</strong> ${_parsedData.customer_email || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Address:</strong> ${_parsedData.street_address || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Town:</strong> ${_parsedData.town || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Year Built:</strong> ${_parsedData.year_built || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Sq Ft:</strong> ${_parsedData.sqft || 'not specified'}<br>
+        <strong>Radon:</strong> ${_parsedData.radon_level || 'not specified'} pCi/L<br>
+        <strong>Garage above:</strong> ${_parsedData.central_flag}<br><br>
+        <label style="display:block;font-size:11px;color:#aaa;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">Warranty</label>
+        <select id="quick_warranty" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #0f3460;background:#0f3460;color:#fff;font-size:15px;margin-bottom:12px">
+          <option value="4year" ${warrantyVal==='4year'?'selected':''}>4-Year Warranty</option>
+          <option value="2year" ${warrantyVal==='2year'?'selected':''}>2.7 Warranty</option>
+          <option value="none" ${warrantyVal==='none'?'selected':''}>No Warranty</option>
+        </select>
+        ${missing.length
+          ? `<div style="color:#e74c3c;font-size:13px;margin-bottom:10px">Missing: ${missing.map(k=>k.replace(/_/g,' ')).join(', ')} — fill in below, then tap Send.</div>`
+          : ''}
+        <button class="btn btn-primary" style="margin-top:0" onclick="submitFromParse()">Send to Gmail Draft</button>
       `;
+    }
 
-      // Fill manual fields too
-      Object.keys(parsed).forEach(k => {
+    function submitFromParse() {
+      if (!_parsedData) return;
+      _parsedData.warranty_type = document.getElementById('quick_warranty').value;
+      // Merge any manual edits
+      ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','central_flag','notes'].forEach(k => {
         const el = document.getElementById(k);
-        if (el) el.value = parsed[k];
+        if (el && el.value.trim()) _parsedData[k] = el.value.trim();
       });
-
-      parsed.warranty_type = document.getElementById('warranty_type').value;
-
-      const missing = ['customer_name','customer_email','street_address','town','year_built']
-        .filter(k => !parsed[k]);
-
-      if (missing.length) {
-        showStatus('Missing: ' + missing.map(k => k.replace('_',' ')).join(', ') + '. Fields filled below — add what\'s missing and tap Create Draft.', 'error');
-        return;
-      }
-
-      triggerWorkflow(parsed);
+      const missing = ['customer_name','customer_email','street_address','town','year_built'].filter(k => !_parsedData[k]);
+      if (missing.length) { showStatus('Still missing: ' + missing.map(k=>k.replace(/_/g,' ')).join(', '), 'error'); return; }
+      triggerWorkflow(_parsedData);
     }
 
     function submitManual() {
@@ -461,7 +479,7 @@
       }
       recognition = new SR();
       recognition.lang = 'en-US';
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = false;
 
       recognition.onstart = () => {
