@@ -98,6 +98,26 @@
     .btn-primary { background: #4a9eff; color: #fff; }
     .btn-quick { background: #5a3fff; color: #fff; }
     .btn-secondary { background: #1e1e3a; color: #666; font-size: 13px; padding: 12px; margin-top: 8px; }
+    .mic-row { display: flex; gap: 10px; align-items: flex-start; }
+    .mic-row textarea { flex: 1; }
+    .mic-btn {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: #0f3460;
+      color: #4a9eff;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .mic-btn.listening { background: #c0392b; color: #fff; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     .status {
       display: none;
       text-align: center;
@@ -138,7 +158,10 @@
     <h2>Quick — Just Say It</h2>
     <div class="hint">Speak or type naturally. Example:<br>"John Smith, john@gmail.com, 47 Maple St Medford MA, built 2003, 1800 sqft, 4.2 pCi"</div>
     <div class="field">
-      <textarea class="quick-textarea" id="quick_text" placeholder="Tap mic and speak, or type here..."></textarea>
+      <div class="mic-row">
+        <textarea class="quick-textarea" id="quick_text" placeholder="Tap mic and speak, or type here..."></textarea>
+        <button class="mic-btn" id="mic_btn" onclick="toggleMic()" title="Tap to speak">🎤</button>
+      </div>
     </div>
     <button class="btn btn-quick" onclick="parseAndSubmit()">Parse &amp; Create Draft</button>
     <div id="parsed_preview" class="parsed-preview"></div>
@@ -420,6 +443,46 @@
       } catch(e) {
         showStatus('Network error: ' + e.message, 'error');
       }
+    }
+
+    // Microphone / Speech Recognition
+    let recognition = null;
+    let isListening = false;
+
+    function toggleMic() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        showStatus('Speech recognition not supported on this browser. Try Chrome or Safari on iOS.', 'error');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      recognition = new SR();
+      recognition.lang = 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('mic_btn').classList.add('listening');
+        document.getElementById('mic_btn').textContent = '⏹';
+      };
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        const ta = document.getElementById('quick_text');
+        ta.value = (ta.value ? ta.value + ' ' : '') + transcript;
+      };
+      recognition.onerror = (e) => {
+        showStatus('Mic error: ' + e.error, 'error');
+      };
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById('mic_btn').classList.remove('listening');
+        document.getElementById('mic_btn').textContent = '🎤';
+      };
+      recognition.start();
     }
   </script>
 
