@@ -164,7 +164,7 @@ jobs:
                 - {SLUG}_ExternalSheet.pdf (mimeType: application/pdf)
               Apply Label_25 ("Auto-quote ready (review)") to the thread.
               Record each quote in pending-quotes.json (create or append) with fields:
-                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false
+                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false, warranty_type: "4year"
 
             - ADD-A-FAN: List in summary. Also record in pending-quotes.json with fields:
                 last_name, first_name, email, street_addr, town, fan: "add-a-fan", pipe: "",

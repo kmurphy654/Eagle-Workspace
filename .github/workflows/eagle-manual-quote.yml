@@ -163,6 +163,7 @@ jobs:
                 "price": PRICE_AS_NUMBER,
                 "date_quoted": "TODAY_DATE",
                 "draft_sent": false,
+                "warranty_type": "WARRANTY_TYPE (4year/2year/none)",
                 "source": "manual"
               }
             Write the updated array back to pending-quotes.json.

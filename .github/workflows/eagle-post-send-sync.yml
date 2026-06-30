@@ -41,7 +41,7 @@ jobs:
                       RedBridgeLn33Psouthhadley.pdf, RedBridgeLn33Wsouthhadley.pdf
 
             STEP 1 — LOAD PENDING: Read pending-quotes.json from the repo. This file contains
-            entries for all auto-quotes that were drafted but not yet confirmed sent.
+            entries for all quotes (auto and manual) that were drafted but not yet confirmed sent.
             If the file is missing or empty, log "No pending quotes — nothing to do" and stop.
 
             STEP 2 — CHECK SENT MAIL: For each entry in pending-quotes.json where draft_sent is false,
@@ -49,12 +49,21 @@ jobs:
             "to:<email> in:sent". If a matching sent message is found that was sent AFTER
             the date_quoted field, that draft has been sent by Kevin.
 
-            STEP 3 — GENERATE PDFs AND SAVE TO DROPBOX: For each newly-confirmed-sent quote:
+            STEP 3 — PROCESS EACH NEWLY-CONFIRMED-SENT QUOTE:
+
+              ADD-A-FAN entries (fan field = "add-a-fan" OR type field = "add-a-fan"):
+                No PDFs to generate. Just mark draft_sent: true and record sent_date.
+                Skip Dropbox upload for these. Note them in the summary as "add-a-fan sent — no Dropbox upload needed."
+
+              QUOTE entries (all others — auto-quotes and manual quotes):
 
               a) Download templates from Dropbox using mcp__Dropbox__download_link:
                  - "/_A-Z forms/Blank with signature.pdf"          → /tmp/blank_sig.pdf
-                 - "/_A-Z forms/4 Warranty.pdf"                    → /tmp/warranty_template.pdf
                  - "/_A-Z forms/External Radon System Sheet.pdf"   → /tmp/external_template.pdf
+                 Choose warranty template based on the entry's warranty_type field:
+                   - "4year" or missing/null → "/_A-Z forms/4 Warranty.pdf" → /tmp/warranty_template.pdf
+                   - "2year"                 → "/_A-Z forms/2.7 WARRANTY.pdf" → /tmp/warranty_template.pdf
+                   - "none"                  → skip warranty template download; no warranty PDF will be generated
                  Download each using: curl -L -o <dest> "<download_url>"
 
               b) Generate the Proposal PDF:
@@ -63,9 +72,9 @@ jobs:
                    --pipe PIPE_SIZE --fan FAN_MODEL --price PRICE --date DATE_QUOTED \
                    --template /tmp/blank_sig.pdf \
                    --out /tmp/proposal_out.pdf \
-                   [--central if applicable]
+                   [--central if the entry has central: true]
 
-              c) Generate the Warranty PDF:
+              c) Generate the Warranty PDF (only if warranty_type is NOT "none"):
                  python eagle-tools/make_warranty.py \
                    --addr "STREET_ADDR, TOWN, MA" \
                    --template-warranty /tmp/warranty_template.pdf \
@@ -73,9 +82,9 @@ jobs:
                    --out-warranty /tmp/warranty_out.pdf \
                    --out-external /tmp/external_out.pdf
 
-              d) Upload both to Dropbox using mcp__Dropbox__create_file:
+              d) Upload to Dropbox using mcp__Dropbox__create_file:
                  - /tmp/proposal_out.pdf → /_A-Z forms/{StreetName}{Number}P{town}.pdf
-                 - /tmp/warranty_out.pdf → /_A-Z forms/{StreetName}{Number}W{town}.pdf
+                 - /tmp/warranty_out.pdf → /_A-Z forms/{StreetName}{Number}W{town}.pdf  (only if warranty generated)
                  Read each file first: base64 -w0 /tmp/proposal_out.pdf
 
               e) Mark draft_sent: true and record sent_date and dropbox_paths in pending-quotes.json.
