@@ -188,9 +188,19 @@
       <label>Street Address</label>
       <input type="text" id="street_address" placeholder="47 Maple Street">
     </div>
-    <div class="field">
-      <label>Town</label>
-      <input type="text" id="town" placeholder="Medford">
+    <div class="row">
+      <div class="field">
+        <label>Town</label>
+        <input type="text" id="town" placeholder="Medford">
+      </div>
+      <div class="field">
+        <label>State</label>
+        <select id="state">
+          <option value="MA">MA</option>
+          <option value="NH">NH</option>
+          <option value="RI">RI</option>
+        </select>
+      </div>
     </div>
     <div class="row">
       <div class="field">
@@ -296,7 +306,7 @@
     function parseQuickText(text) {
       const result = {
         customer_name: '', customer_email: '', street_address: '',
-        town: '', year_built: '', sqft: '', radon_level: '', central_flag: 'no', notes: ''
+        town: '', state: 'MA', year_built: '', sqft: '', radon_level: '', central_flag: 'no', notes: ''
       };
 
       // Email
@@ -321,6 +331,11 @@
       // Street address — fully case-insensitive, title-case the result
       const addrMatch = text.match(/\b(\d+\s+[a-z]+(?:\s+[a-z]+){0,4}(?:\s+(?:st|street|dr|drive|rd|road|ave|avenue|ln|lane|way|blvd|ct|court|pl|place|hill|brook|lake|park|view|ridge|glen|wood|mills|point|run|trail|circle|cir|ter|terrace|heights|pkwy|parkway)\.?))\b/i);
       if (addrMatch) result.street_address = toTitleCase(addrMatch[1].trim());
+
+      // State — detect NH or RI; default MA
+      if (/\bnh\b|new hampshire/i.test(text)) result.state = 'NH';
+      else if (/\bri\b|rhode island/i.test(text)) result.state = 'RI';
+      else result.state = 'MA';
 
       // Town — search AFTER the address to avoid grabbing name words as town.
       // Pattern: 1-3 word town name followed by a state abbreviation.
@@ -376,7 +391,12 @@
         <strong>Name:</strong> ${_parsedData.customer_name || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
         <strong>Email:</strong> ${_parsedData.customer_email || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
         <strong>Address:</strong> ${_parsedData.street_address || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
-        <strong>Town:</strong> ${_parsedData.town || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
+        <strong>Town:</strong> ${_parsedData.town || '<span style="color:#e74c3c">⚠ missing</span>'} &nbsp;
+        <select id="preview_state" style="display:inline;width:70px;padding:4px 6px;border-radius:6px;border:1px solid #0f3460;background:#0f3460;color:#fff;font-size:13px">
+          <option value="MA" ${(_parsedData.state||'MA')==='MA'?'selected':''}>MA</option>
+          <option value="NH" ${(_parsedData.state||'MA')==='NH'?'selected':''}>NH</option>
+          <option value="RI" ${(_parsedData.state||'MA')==='RI'?'selected':''}>RI</option>
+        </select><br>
         <strong>Year Built:</strong> ${_parsedData.year_built || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
         <strong>Sq Ft:</strong> ${_parsedData.sqft || 'not specified'}<br>
         <strong>Radon:</strong> ${_parsedData.radon_level || 'not specified'} pCi/L<br>
@@ -397,8 +417,10 @@
     function submitFromParse() {
       if (!_parsedData) return;
       _parsedData.warranty_type = document.getElementById('quick_warranty').value;
+      const previewState = document.getElementById('preview_state');
+      if (previewState) _parsedData.state = previewState.value;
       // Merge any manual edits
-      ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','central_flag','price_override','notes'].forEach(k => {
+      ['customer_name','customer_email','street_address','town','state','year_built','sqft','radon_level','central_flag','price_override','notes'].forEach(k => {
         const el = document.getElementById(k);
         if (el && el.value.trim()) _parsedData[k] = el.value.trim();
       });
@@ -416,6 +438,7 @@
         year_built: document.getElementById('year_built').value.trim(),
         sqft: document.getElementById('sqft').value.trim(),
         radon_level: document.getElementById('radon_level').value.trim(),
+        state: document.getElementById('state').value,
         central_flag: document.getElementById('central_flag').value,
         warranty_type: document.getElementById('warranty_type').value,
         price_override: document.getElementById('price_override').value.trim(),
@@ -461,6 +484,7 @@
             if (el) el.value = '';
           });
           document.getElementById('central_flag').value = 'no';
+          document.getElementById('state').value = 'MA';
           document.getElementById('quick_text').value = '';
           document.getElementById('parsed_preview').style.display = 'none';
         } else {

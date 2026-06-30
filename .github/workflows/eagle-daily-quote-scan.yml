@@ -166,9 +166,29 @@ jobs:
               Record each quote in pending-quotes.json (create or append) with fields:
                 last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false, warranty_type: "4year"
 
-            - ADD-A-FAN: List in summary. Also record in pending-quotes.json with fields:
-                last_name, first_name, email, street_addr, town, fan: "add-a-fan", pipe: "",
-                price: 0, date_quoted: TODAY, draft_sent: false, type: "add-a-fan"
+            - ADD-A-FAN: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
+              Standard add-a-fan price: $850. Fan: RP145. Pipe: "" (existing pipe already there).
+              Generate the proposal PDF only (NO warranty or external sheet — fan addition has no warranty):
+                Derive the same address+town slug as auto-quotes.
+                python eagle-tools/make_proposal.py \
+                  --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
+                  --pipe 3 --fan RP145 --price 850 --date TODAY_DATE \
+                  --template /tmp/blank_sig.pdf \
+                  --out /tmp/{SLUG}_Proposal.pdf
+                Verify the file exists: ls -la /tmp/{SLUG}_Proposal.pdf
+                Read it: base64 -w0 /tmp/{SLUG}_Proposal.pdf
+              Create a Gmail draft TO the customer:
+                Subject: Radon Fan Addition Proposal — STREET ADDRESS, TOWN
+                Body: Hi FIRST_NAME, thank you for reaching out to Eagle Environmental.
+                We can add a radon fan to your existing passive pipe system at STREET ADDRESS, TOWN, MA.
+                Price: $850. This includes the fan unit, installation, and all labor.
+                Please reply or call (508) 393-7633 to schedule.
+                Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
+                Attach: {SLUG}_Proposal.pdf
+              Apply Label_25 to the thread.
+              Record in pending-quotes.json:
+                last_name, first_name, email, street_addr, town, fan: "RP145", pipe: "",
+                price: 850, date_quoted: TODAY, draft_sent: false, warranty_type: "none", type: "add-a-fan"
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
@@ -195,16 +215,22 @@ jobs:
               To: kmurphy654@gmail.com
               From: eagle82nd@gmail.com
               Subject: Eagle Daily Quote Scan complete — <TODAY_DATE>
-              Body: A plain-text summary covering ALL open inbox leads, including:
-                - counts for each bucket (auto-quotes, add-a-fan, Bryan, needs info, aged out, skipped)
-                - BRYAN section: list every BRYAN lead by name, address, and reason (repeat from prior days — still open)
-                - NEEDS INFO section: list every needs-info lead by name/partial info and what is missing
-                - ADD-A-FAN section: list every add-a-fan lead by name and address
-                - names and addresses of any auto-quote drafts created today (ready to review in Gmail)
-                - any aged-out leads
-                - thread-reply skips and calendar skips
-                - note if iMessage check was skipped
-                - OPEN QUOTES BY AREA section (same groupings as above — all pending-quotes.json entries where draft_sent is false, grouped by region, each annotated [AUTO-QUOTE] or [FAN REQUEST])
+              Body — keep it short and action-focused, two sections only:
+
+              SECTION 1 — TIME-SENSITIVE (only if any exist):
+                List any lead where the submission mentions a real estate closing, inspection deadline,
+                moving date, or other urgency — or radon > 25 pCi/L with a stated deadline.
+                Format: Name — Address — reason it's urgent
+                If none, omit this section entirely.
+
+              SECTION 2 — OPEN QUOTES BY AREA:
+                All pending-quotes.json entries where draft_sent is false.
+                Same regional groupings as STEP 5. Each line:
+                  Name — Address, Town — $Price — [AUTO-QUOTE] or [FAN REQUEST]
+                If none, write "No open quotes."
+
+              Do NOT include Bryan lists, Needs Info lists, aged-out lists, skip counts,
+              or iMessage notes in the email. Those belong in the .md summary file only.
             Send using curl with Gmail SMTP:
               curl --ssl-reqd \
                 --url "smtps://smtp.gmail.com:465" \

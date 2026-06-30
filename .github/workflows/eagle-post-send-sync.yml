@@ -52,9 +52,8 @@ jobs:
             STEP 3 — PROCESS EACH NEWLY-CONFIRMED-SENT QUOTE:
 
               All entry types (auto-quote, manual, add-a-fan) go through the same sent-detection flow.
-              The only difference for add-a-fan: no proposal or warranty PDF was originally generated,
-              so skip PDF generation and Dropbox upload — but still mark draft_sent: true and record sent_date
-              so it no longer appears in open-quotes reports. Note it in the summary as sent.
+              All types get PDFs regenerated and uploaded to Dropbox when sent.
+              For add-a-fan (type = "add-a-fan"): generate proposal only, no warranty (warranty_type = "none").
 
               a) Download templates from Dropbox using mcp__Dropbox__download_link:
                  - "/_A-Z forms/Blank with signature.pdf"          → /tmp/blank_sig.pdf

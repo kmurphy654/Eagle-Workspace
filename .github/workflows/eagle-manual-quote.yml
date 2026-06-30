@@ -15,6 +15,10 @@ on:
       town:
         description: 'Town (e.g. Leominster)'
         required: true
+      state:
+        description: 'State (e.g. MA, NH, CT) — defaults to MA'
+        required: false
+        default: 'MA'
       year_built:
         description: 'Year built (e.g. 2003)'
         required: true
@@ -69,7 +73,7 @@ jobs:
             CUSTOMER DETAILS:
             - Name: ${{ inputs.customer_name }}
             - Email: ${{ inputs.customer_email }}
-            - Address: ${{ inputs.street_address }}, ${{ inputs.town }}, MA
+            - Address: ${{ inputs.street_address }}, ${{ inputs.town }}, ${{ inputs.state || 'MA' }}
             - Year built: ${{ inputs.year_built }}
             - Living area sq ft: ${{ inputs.sqft || 'unknown' }}
             - Radon level: ${{ inputs.radon_level || 'unknown' }} pCi/L
