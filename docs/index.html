@@ -496,9 +496,13 @@
         showStatus('Mic error: ' + e.error, 'error');
       };
       recognition.onend = () => {
-        isListening = false;
-        document.getElementById('mic_btn').classList.remove('listening');
-        document.getElementById('mic_btn').textContent = '🎤';
+        if (isListening) {
+          // Auto-restart if user hasn't tapped stop — Chrome cuts off on silence
+          try { recognition.start(); } catch(e) {}
+        } else {
+          document.getElementById('mic_btn').classList.remove('listening');
+          document.getElementById('mic_btn').textContent = '🎤';
+        }
       };
       recognition.start();
     }
