@@ -1,0 +1,28 @@
+[
+  {
+    "last_name": "Spicer",
+    "first_name": "Sandy",
+    "email": "Sandy.spicer@cbrealty.com",
+    "street_addr": "105 Main St",
+    "town": "Townsend, MA",
+    "fan": "GX5A",
+    "pipe": "3\"",
+    "price": 1750,
+    "date_quoted": "2026-06-30",
+    "draft_sent": false,
+    "notes": "Cape/Saltbox, ~1985, concrete foundation, radon 7 pCi/L, distance adder"
+  },
+  {
+    "last_name": "Montalbano",
+    "first_name": "Charles",
+    "email": "Charlie@m-csi.com",
+    "street_addr": "178 North Common",
+    "town": "Westminster, MA",
+    "fan": "GX5A",
+    "pipe": "3\"",
+    "price": 1750,
+    "date_quoted": "2026-06-30",
+    "draft_sent": false,
+    "notes": "Ranch, ~1965, concrete foundation, sump pump, radon 15.4 pCi/L, distance adder"
+  }
+]
