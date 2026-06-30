@@ -98,7 +98,13 @@ jobs:
             - AGED OUT: no reply in 14+ days from submission date.
 
             STEP 4 — ACT:
-            - CLEAN AUTO-QUOTE: For each lead, generate the three PDFs using Bash:
+            - CLEAN AUTO-QUOTE: For each lead, generate the three PDFs using Bash.
+              CRITICAL: You MUST actually run each python command below with Bash and verify
+              it exits with code 0 before proceeding. If any command fails, skip this lead
+              entirely — do NOT create a draft, do NOT put commands in the email body.
+              Log the failure in the summary instead.
+
+              Run these Bash commands (substitute actual values):
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
                   --pipe PIPE_SIZE --fan FAN_MODEL --price PRICE --date TODAY_DATE \
@@ -111,9 +117,25 @@ jobs:
                   --template-external /tmp/external_template.pdf \
                   --out-warranty /tmp/warranty_LASTNAME.pdf \
                   --out-external /tmp/external_LASTNAME.pdf
-              Then read each output PDF with Bash (base64 -w0) to get the base64 content.
-              Create a Gmail draft addressed TO the customer's email (not a reply to webadmin).
-              Include fan model, pipe size, price, and any relevant notes in the body.
+
+              After both commands succeed, verify the output files exist:
+                ls -la /tmp/proposal_LASTNAME.pdf /tmp/warranty_LASTNAME.pdf /tmp/external_LASTNAME.pdf
+
+              If any file is missing, skip this lead — do NOT create a draft.
+
+              Then read each output PDF with Bash to get base64:
+                base64 -w0 /tmp/proposal_LASTNAME.pdf
+                base64 -w0 /tmp/warranty_LASTNAME.pdf
+                base64 -w0 /tmp/external_LASTNAME.pdf
+
+              Create a Gmail draft addressed TO the customer's email (NOT a reply to webadmin).
+              Subject: Radon Mitigation Proposal — STREET ADDRESS, TOWN
+              Body: Hi FIRST_NAME, thank you for reaching out to Eagle Environmental. Please
+              find attached our proposal for radon mitigation at STREET ADDRESS, TOWN, MA.
+              We will install a sub-slab depressurization system using a FAN_MODEL fan with
+              PIPE_SIZEin PVC pipe. Proposal price: $PRICE. This includes all labor, materials,
+              and our standard warranty. Please reply or call (508) 393-7633 to schedule.
+              Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
               Attach all three PDFs using the attachments field:
                 - proposal_LASTNAME.pdf (mimeType: application/pdf)
                 - warranty_LASTNAME.pdf (mimeType: application/pdf)
@@ -170,6 +192,8 @@ jobs:
             - NEVER send any email to customers. Only create drafts for customer emails.
             - The summary email to kmurphy654@gmail.com is the only email that may be sent.
             - The three PDF attachments (proposal, warranty, external sheet) MUST be attached to every auto-quote draft — do not skip PDF generation.
+            - NEVER put PDF generation commands or instructions in a draft body. Either attach the real PDFs or skip the draft entirely.
+            - NEVER create a draft without real PDF attachments. A draft with no attachments or with command text in the body is worse than no draft.
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
