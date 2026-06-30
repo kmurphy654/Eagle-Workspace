@@ -86,9 +86,24 @@ jobs:
 
             STEP 2 — SKIP: Any thread already carrying Label_22, Label_23, Label_24, Label_25, or Label_26 is already processed — skip it entirely.
 
-            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): Read /tmp/calendar_events.json (already fetched by a prior workflow step). Parse the JSON — it has a "status" field ("ok", "skipped", or "error") and an "events" array where each event has "summary" and "description" fields. For each remaining lead, do a case-insensitive substring search across all event summaries and descriptions for the homeowner's PHONE NUMBER, STREET NAME, and FIRST NAME. If any match is found, skip that lead — it is already in the pipeline. List skipped leads under "Already on calendar — skipped." If status is not "ok", note the reason and continue without skipping anyone.
+            STEP 2b — THREAD ACTIVITY CHECK (CRITICAL): For each remaining lead, call
+            mcp__Gmail__get_thread on its thread ID to read ALL messages in the thread.
+            If the thread contains more than one message (i.e., there has been any reply —
+            from Kevin or the homeowner — beyond the original webadmin submission), skip
+            that lead. It is already being handled personally. List it in the summary under
+            "Thread has replies — skipped (handle personally)."
 
-            STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
+            STEP 2c — CALENDAR CROSS-CHECK (CRITICAL): Read /tmp/calendar_events.json using
+            Bash: python3 -c "import json; d=json.load(open('/tmp/calendar_events.json')); print(d['status']); [print(e['summary'],'|',e.get('description','')) for e in d['events']]"
+            If status is "ok", for each remaining lead search ALL event summaries and
+            descriptions (case-insensitive) for the homeowner's PHONE NUMBER, STREET NAME
+            (just the street name word, e.g. "Whipple" from "60 Whipple Hill Rd"), and
+            FIRST NAME. If ANY match is found → skip that lead, it is already in the
+            pipeline. List skipped leads under "Already on calendar — skipped."
+            If status is not "ok", note the reason and do NOT skip anyone.
+
+            STEP 2d — TEXT CONTACT CHECK: iMessage is not available in GitHub Actions.
+            Note "iMessage check skipped — not available in this environment" in summary.
 
             STEP 3 — CLASSIFY each remaining thread into one of:
             - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
@@ -144,19 +159,27 @@ jobs:
               Record each quote in pending-quotes.json (create or append) with fields:
                 last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false
 
+            - ADD-A-FAN: List in summary. Also record in pending-quotes.json with fields:
+                last_name, first_name, email, street_addr, town, fan: "add-a-fan", pipe: "",
+                price: 0, date_quoted: TODAY, draft_sent: false, type: "add-a-fan"
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
             STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads.
 
-            Also include an "OPEN QUOTES BY AREA" section: read pending-quotes.json (if it exists) and list all entries where draft_sent is false. Group them by general geographic area using the town field — use these groupings:
+            Also include an "OPEN QUOTES BY AREA" section: read pending-quotes.json (if it
+            exists) and list ALL entries where draft_sent is false — including both
+            auto-quotes and add-a-fan entries. Group by town using these regions:
               - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville
               - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen
               - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield
               - South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
               - Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
               - Any town not matching above: group under "Other"
-            For each group with open quotes, list: customer name, address, town, price, date quoted. If pending-quotes.json doesn't exist or is empty, write "No open quotes."
+            For each entry show: customer name, address, town, price (or "add-a-fan"), date
+            quoted, and a tag — [AUTO-QUOTE] or [FAN REQUEST] — based on the type field
+            (or fan field = "add-a-fan"). If pending-quotes.json doesn't exist or has no
+            open entries, write "No open quotes."
 
             Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1.
 
@@ -170,7 +193,7 @@ jobs:
                 - names and addresses of any auto-quote drafts created (ready to review in Gmail)
                 - any aged-out leads
                 - note if iMessage check was skipped
-                - OPEN QUOTES BY AREA section (same groupings as above — all pending-quotes.json entries where draft_sent is false, grouped by region)
+                - OPEN QUOTES BY AREA section (same groupings as above — all pending-quotes.json entries where draft_sent is false, grouped by region, each annotated [AUTO-QUOTE] or [FAN REQUEST])
             Send using curl with Gmail SMTP:
               curl --ssl-reqd \
                 --url "smtps://smtp.gmail.com:465" \
