@@ -1,0 +1,143 @@
+name: Eagle Manual Quote
+
+on:
+  workflow_dispatch:
+    inputs:
+      customer_name:
+        description: 'Full name (e.g. John Smith)'
+        required: true
+      customer_email:
+        description: 'Customer email address'
+        required: true
+      street_address:
+        description: 'Street address (e.g. 26 Long Hill Dr)'
+        required: true
+      town:
+        description: 'Town (e.g. Leominster)'
+        required: true
+      year_built:
+        description: 'Year built (e.g. 2003)'
+        required: true
+      sqft:
+        description: 'Living area sq ft (e.g. 1800) — leave blank if unknown'
+        required: false
+        default: ''
+      radon_level:
+        description: 'Radon level pCi/L (e.g. 4.2) — leave blank if unknown'
+        required: false
+        default: ''
+      central_flag:
+        description: 'Garage with living space above? (yes/no)'
+        required: false
+        default: 'no'
+      notes:
+        description: 'Any extra notes for the email body'
+        required: false
+        default: ''
+
+jobs:
+  manual-quote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PDF generation dependencies
+        run: pip install pypdfium2 reportlab pypdf
+
+      - name: Run Eagle Manual Quote
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          mode: agent
+          allowed_tools: "mcp__Gmail__create_draft,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          direct_prompt: |
+            Create a manual Eagle Environmental radon mitigation quote draft for the following customer.
+
+            CUSTOMER DETAILS:
+            - Name: ${{ inputs.customer_name }}
+            - Email: ${{ inputs.customer_email }}
+            - Address: ${{ inputs.street_address }}, ${{ inputs.town }}, MA
+            - Year built: ${{ inputs.year_built }}
+            - Living area sq ft: ${{ inputs.sqft || 'unknown' }}
+            - Radon level: ${{ inputs.radon_level || 'unknown' }} pCi/L
+            - Garage with living space above: ${{ inputs.central_flag }}
+            - Notes: ${{ inputs.notes || 'none' }}
+
+            STEP 1 — DETERMINE FAN AND PRICE:
+            - Fan model: RP145 if built 2000 or newer; GX5A if older
+            - Pipe size: 3" standard; 4" if living area > 3,500 sq ft
+            - Base price: $1,650; $2,250 if living area > 3,500 sq ft
+            - Add $100 if address is in: North Shore, far Greater Boston edges, South Coast, Cape Cod, or southeastern MA
+
+            STEP 2 — COPY TEMPLATES:
+            Run these Bash commands:
+              cp "eagle-tools/templates/Blank with signature.pdf" /tmp/blank_sig.pdf
+              cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+              cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+
+            STEP 3 — GENERATE PDFs:
+            Run:
+              python eagle-tools/make_proposal.py \
+                --name "CUSTOMER_NAME" \
+                --addr "STREET_ADDRESS" \
+                --town "TOWN, MA" \
+                --pipe PIPE_SIZE \
+                --fan FAN_MODEL \
+                --price PRICE \
+                --date TODAY_DATE \
+                --template /tmp/blank_sig.pdf \
+                --out /tmp/proposal.pdf \
+                [--central if garage flag is yes]
+
+              python eagle-tools/make_warranty.py \
+                --addr "STREET_ADDRESS, TOWN, MA" \
+                --template-warranty /tmp/warranty_template.pdf \
+                --template-external /tmp/external_template.pdf \
+                --out-warranty /tmp/warranty.pdf \
+                --out-external /tmp/external.pdf
+
+            STEP 4 — CREATE GMAIL DRAFT:
+            Read each PDF with: base64 -w0 /tmp/proposal.pdf (etc.)
+            Create a Gmail draft with:
+              To: CUSTOMER_EMAIL
+              Subject: Radon Mitigation Proposal — STREET_ADDRESS, TOWN
+              Body:
+                Hi FIRST_NAME,
+
+                Thank you for reaching out to Eagle Environmental. Please find attached our proposal for radon mitigation at STREET_ADDRESS, TOWN, MA.
+
+                We will install a sub-slab depressurization system using a FAN_MODEL fan with PIPE_SIZE PVC pipe. This system will draw radon from beneath your foundation and vent it safely above the roofline.
+
+                Proposal price: $PRICE
+                This price includes all labor, materials, and our standard warranty.
+
+                Please review the attached proposal and warranty documents. If you have any questions or would like to schedule your installation, please reply to this email or call us directly.
+
+                We look forward to working with you.
+
+                Kevin Murphy
+                Eagle Environmental
+                (781) 718-4734
+                eagle82nd@gmail.com
+
+                [Add any extra notes from the notes field if provided]
+
+            Attach all three PDFs:
+              - proposal.pdf (mimeType: application/pdf)
+              - warranty.pdf (mimeType: application/pdf)
+              - external.pdf (mimeType: application/pdf)
+
+            STEP 5 — NOTIFY:
+            Send one PushNotification confirming the draft was created with the customer name and address.
+
+            ABSOLUTE RULES:
+            - NEVER send any email. Only create a draft.
+            - All three PDFs MUST be attached.
+        env:
+          GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
+          EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
