@@ -11,42 +11,39 @@
       background: #1a1a2e;
       color: #eee;
       min-height: 100vh;
-      padding: 20px;
+      padding: 20px 16px 40px;
     }
     .header {
       text-align: center;
       margin-bottom: 24px;
     }
-    .header h1 {
-      font-size: 22px;
-      color: #fff;
-      font-weight: 700;
-    }
-    .header p {
-      font-size: 13px;
-      color: #888;
-      margin-top: 4px;
-    }
+    .header h1 { font-size: 22px; color: #fff; font-weight: 700; }
+    .header p { font-size: 13px; color: #888; margin-top: 4px; }
     .card {
       background: #16213e;
       border-radius: 16px;
       padding: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       border: 1px solid #0f3460;
     }
     .card h2 {
-      font-size: 13px;
+      font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #4a9eff;
       margin-bottom: 14px;
     }
-    .field {
-      margin-bottom: 14px;
+    .card .hint {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.5;
     }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
     label {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       color: #aaa;
       margin-bottom: 5px;
       text-transform: uppercase;
@@ -62,11 +59,30 @@
       font-size: 16px;
       -webkit-appearance: none;
     }
-    input::placeholder { color: #555; }
-    textarea { height: 80px; resize: vertical; font-size: 14px; }
+    input::placeholder, textarea::placeholder { color: #444; }
+    textarea { resize: vertical; font-size: 15px; line-height: 1.5; }
+    .quick-textarea { height: 110px; }
+    .notes-textarea { height: 70px; }
     select option { background: #1a1a2e; }
     .row { display: flex; gap: 10px; }
     .row .field { flex: 1; }
+    .divider {
+      text-align: center;
+      color: #444;
+      font-size: 12px;
+      margin: 4px 0 14px;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #2a2a4a;
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
     .btn {
       width: 100%;
       padding: 16px;
@@ -75,26 +91,39 @@
       font-size: 17px;
       font-weight: 700;
       cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.2s;
+      margin-top: 6px;
+      transition: opacity 0.15s;
     }
-    .btn:active { opacity: 0.8; }
+    .btn:active { opacity: 0.75; }
     .btn-primary { background: #4a9eff; color: #fff; }
-    .btn-secondary { background: #2d2d4e; color: #aaa; font-size: 13px; margin-top: 6px; }
+    .btn-quick { background: #5a3fff; color: #fff; }
+    .btn-secondary { background: #1e1e3a; color: #666; font-size: 13px; padding: 12px; margin-top: 8px; }
     .status {
       display: none;
       text-align: center;
       padding: 16px;
       border-radius: 12px;
-      margin-top: 16px;
+      margin-top: 14px;
       font-size: 15px;
       font-weight: 600;
+      line-height: 1.4;
     }
     .status.success { background: #1a3a1a; color: #4caf50; display: block; }
     .status.error { background: #3a1a1a; color: #f44336; display: block; }
     .status.loading { background: #1a2a3a; color: #4a9eff; display: block; }
-    .token-section { margin-top: 6px; }
-    .token-hint { font-size: 11px; color: #666; margin-top: 5px; }
+    .token-hint { font-size: 11px; color: #555; margin-top: 5px; }
+    .parsed-preview {
+      display: none;
+      background: #0a1628;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #aaa;
+      border: 1px solid #1a3a6a;
+    }
+    .parsed-preview strong { color: #fff; }
   </style>
 </head>
 <body>
@@ -104,6 +133,20 @@
     <p>Quick Quote Generator</p>
   </div>
 
+  <!-- QUICK MODE -->
+  <div class="card">
+    <h2>Quick — Just Say It</h2>
+    <div class="hint">Speak or type naturally. Example:<br>"John Smith, john@gmail.com, 47 Maple St Medford, built 2003, 1800 sqft, 4.2 pCi"</div>
+    <div class="field">
+      <textarea class="quick-textarea" id="quick_text" placeholder="Tap mic and speak, or type here..."></textarea>
+    </div>
+    <button class="btn btn-quick" onclick="parseAndSubmit()">Parse &amp; Create Draft</button>
+    <div id="parsed_preview" class="parsed-preview"></div>
+  </div>
+
+  <div class="divider">or fill in manually</div>
+
+  <!-- MANUAL MODE -->
   <div class="card">
     <h2>Customer</h2>
     <div class="field">
@@ -138,7 +181,7 @@
     </div>
     <div class="row">
       <div class="field">
-        <label>Radon pCi/L (optional)</label>
+        <label>Radon pCi/L</label>
         <input type="text" id="radon_level" placeholder="4.2">
       </div>
       <div class="field">
@@ -154,20 +197,19 @@
   <div class="card">
     <h2>Notes (optional)</h2>
     <div class="field">
-      <textarea id="notes" placeholder="Any extra details for the email..."></textarea>
+      <textarea class="notes-textarea" id="notes" placeholder="Extra details for the email..."></textarea>
     </div>
   </div>
 
-  <div class="card token-section">
+  <div class="card">
     <h2>GitHub Token</h2>
     <div class="field">
-      <label>Personal Access Token</label>
       <input type="password" id="github_token" placeholder="ghp_..." autocomplete="off">
-      <div class="token-hint">Saved locally on this device. Enter once and it stays.</div>
+      <div class="token-hint">Saved on this device. Enter once.</div>
     </div>
   </div>
 
-  <button class="btn btn-primary" onclick="submitQuote()">Create Draft in Gmail</button>
+  <button class="btn btn-primary" onclick="submitManual()">Create Draft in Gmail</button>
   <button class="btn btn-secondary" onclick="clearToken()">Clear saved token</button>
 
   <div id="status" class="status"></div>
@@ -193,40 +235,107 @@
       const el = document.getElementById('status');
       el.textContent = msg;
       el.className = 'status ' + type;
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    async function submitQuote() {
-      const name = document.getElementById('customer_name').value.trim();
-      const email = document.getElementById('customer_email').value.trim();
-      const addr = document.getElementById('street_address').value.trim();
-      const town = document.getElementById('town').value.trim();
-      const year = document.getElementById('year_built').value.trim();
+    function parseQuickText(text) {
+      const result = {
+        customer_name: '', customer_email: '', street_address: '',
+        town: '', year_built: '', sqft: '', radon_level: '', central_flag: 'no', notes: ''
+      };
+
+      const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
+      if (emailMatch) result.customer_email = emailMatch[0];
+
+      const yearMatch = text.match(/\b(19[0-9]{2}|20[0-2][0-9])\b/);
+      if (yearMatch) result.year_built = yearMatch[1];
+
+      const sqftMatch = text.match(/(\d{3,5})\s*(?:sq\.?\s*ft|sqft|sf)\b/i);
+      if (sqftMatch) result.sqft = sqftMatch[1];
+
+      const radonMatch = text.match(/([\d.]+)\s*(?:pci|pcil|pCi\/L|pCi)/i);
+      if (radonMatch) result.radon_level = radonMatch[1];
+
+      if (/garage|central|living above/i.test(text)) result.central_flag = 'yes';
+
+      const townMatch = text.match(/,\s*([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*(?:,\s*MA|MA)?\s*(?:,|built|\d{4}|$)/i)
+                     || text.match(/([A-Z][a-z]+(?:\s[A-Z][a-z]+)?),?\s*MA\b/i);
+      if (townMatch) result.town = townMatch[1].trim();
+
+      const addrMatch = text.match(/\b(\d+\s+[A-Za-z]+(?:\s+[A-Za-z]+){0,3}(?:\s+(?:St|Street|Dr|Drive|Rd|Road|Ave|Avenue|Ln|Lane|Way|Blvd|Ct|Court|Pl|Place)\.?))\b/i);
+      if (addrMatch) result.street_address = addrMatch[1].trim();
+
+      const beforeEmail = text.split(/[\w.+-]+@/)[0];
+      const nameMatch = beforeEmail.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/);
+      if (nameMatch) result.customer_name = nameMatch[1].trim();
+
+      return result;
+    }
+
+    function parseAndSubmit() {
+      const text = document.getElementById('quick_text').value.trim();
+      if (!text) { showStatus('Please say or type the quote details first.', 'error'); return; }
+
+      const parsed = parseQuickText(text);
+
+      const preview = document.getElementById('parsed_preview');
+      preview.style.display = 'block';
+      preview.innerHTML = `
+        <strong>Name:</strong> ${parsed.customer_name || '⚠ missing'}<br>
+        <strong>Email:</strong> ${parsed.customer_email || '⚠ missing'}<br>
+        <strong>Address:</strong> ${parsed.street_address || '⚠ missing'}<br>
+        <strong>Town:</strong> ${parsed.town || '⚠ missing'}<br>
+        <strong>Year Built:</strong> ${parsed.year_built || '⚠ missing'}<br>
+        <strong>Sq Ft:</strong> ${parsed.sqft || 'not specified'}<br>
+        <strong>Radon:</strong> ${parsed.radon_level || 'not specified'} pCi/L<br>
+        <strong>Garage above:</strong> ${parsed.central_flag}
+      `;
+
+      Object.keys(parsed).forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = parsed[k];
+      });
+
+      const missing = ['customer_name','customer_email','street_address','town','year_built']
+        .filter(k => !parsed[k]);
+
+      if (missing.length) {
+        showStatus('Missing: ' + missing.map(k => k.replace(/_/g,' ')).join(', ') + '. Fill in below then tap Create Draft.', 'error');
+        return;
+      }
+
+      triggerWorkflow(parsed);
+    }
+
+    function submitManual() {
+      const parsed = {
+        customer_name: document.getElementById('customer_name').value.trim(),
+        customer_email: document.getElementById('customer_email').value.trim(),
+        street_address: document.getElementById('street_address').value.trim(),
+        town: document.getElementById('town').value.trim(),
+        year_built: document.getElementById('year_built').value.trim(),
+        sqft: document.getElementById('sqft').value.trim(),
+        radon_level: document.getElementById('radon_level').value.trim(),
+        central_flag: document.getElementById('central_flag').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      const missing = ['customer_name','customer_email','street_address','town','year_built']
+        .filter(k => !parsed[k]);
+      if (missing.length) {
+        showStatus('Please fill in: ' + missing.map(k => k.replace(/_/g,' ')).join(', '), 'error');
+        return;
+      }
+
+      triggerWorkflow(parsed);
+    }
+
+    async function triggerWorkflow(inputs) {
       const token = document.getElementById('github_token').value.trim();
-
-      if (!name || !email || !addr || !town || !year) {
-        showStatus('Please fill in name, email, address, town, and year built.', 'error');
-        return;
-      }
-      if (!token) {
-        showStatus('Please enter your GitHub token.', 'error');
-        return;
-      }
-
+      if (!token) { showStatus('Please enter your GitHub token.', 'error'); return; }
       localStorage.setItem('eagle_gh_token', token);
 
-      showStatus('Submitting... Draft will be in Gmail in ~2 minutes.', 'loading');
-
-      const inputs = {
-        customer_name: name,
-        customer_email: email,
-        street_address: addr,
-        town: town,
-        year_built: year,
-        sqft: document.getElementById('sqft').value.trim() || '',
-        radon_level: document.getElementById('radon_level').value.trim() || '',
-        central_flag: document.getElementById('central_flag').value,
-        notes: document.getElementById('notes').value.trim() || ''
-      };
+      showStatus('Sending... draft will be in Gmail in ~2 minutes.', 'loading');
 
       try {
         const response = await fetch(
@@ -243,16 +352,19 @@
         );
 
         if (response.status === 204) {
-          showStatus('Done! Draft will be in Gmail in about 2 minutes.', 'success');
+          showStatus('Done! Draft for ' + inputs.customer_name + ' will be in Gmail in about 2 minutes.', 'success');
           ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','notes'].forEach(id => {
-            document.getElementById(id).value = '';
+            const el = document.getElementById(id);
+            if (el) el.value = '';
           });
           document.getElementById('central_flag').value = 'no';
+          document.getElementById('quick_text').value = '';
+          document.getElementById('parsed_preview').style.display = 'none';
         } else {
-          const err = await response.json();
-          showStatus('Error: ' + (err.message || response.status), 'error');
+          const err = await response.json().catch(() => ({}));
+          showStatus('Error: ' + (err.message || 'status ' + response.status), 'error');
         }
-      } catch (e) {
+      } catch(e) {
         showStatus('Network error: ' + e.message, 'error');
       }
     }
