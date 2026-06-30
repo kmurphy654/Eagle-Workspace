@@ -195,6 +195,48 @@ OpenClaw has **no built-in dollar cap**, so enforce spend at three layers:
 
 ---
 
+## Keeping iMessage scoped to ONE Apple ID (account isolation)
+
+Goal: OpenClaw should serve a *dedicated* Apple ID (e.g. `buddingbodhi`) and must
+**not** ingest a separate business/personal Apple ID's texts.
+
+**Key fact:** all Apple IDs signed into one macOS user's Messages app share a
+single database (`~/Library/Messages/chat.db`). OpenClaw reads that DB, so an
+allowlist only stops *replies* — it does not stop OpenClaw from *seeing* the
+other account's messages. True isolation = a Messages database that contains
+only the dedicated Apple ID.
+
+**Correct architecture:** run OpenClaw under a macOS user account (or dedicated
+Mac/Mac mini) whose Messages is signed into ONLY the dedicated Apple ID. The
+other person keeps texting from their own iPhone/device — different database,
+never visible to OpenClaw.
+
+**Leak paths to close even when logins are separate:**
+
+1. **Shared "Send & Receive" number** — dedicated login → Messages → Settings →
+   iMessage → "You can be reached at": only the dedicated address checked; remove
+   the other person's phone number.
+2. **Text Message Forwarding** — on the other person's iPhone → Settings →
+   Messages → Text Message Forwarding → the OpenClaw Mac must be OFF.
+3. **Same Apple ID signed in twice** — confirm the IDs are genuinely separate.
+4. **Wrong `dbPath`** — verify OpenClaw reads the dedicated user's DB:
+   ```bash
+   openclaw config get channels.imessage.dbPath   # empty (own user) or under the dedicated user's home
+   whoami                                          # the dedicated macOS user, not the other person's
+   openclaw config unset channels.imessage.dbPath  # if it points at the wrong home
+   ```
+
+**Let a specific person still text the assistant** (and ignore everyone else):
+```bash
+openclaw config set channels.imessage.dmPolicy allowlist
+openclaw config set channels.imessage.allowFrom '["+1THEIR_NUMBER","+1YOUR_NUMBER"]'
+openclaw doctor
+openclaw gateway restart
+```
+(For iMessage the DM sender allowlist key is `allowFrom`.)
+
+---
+
 ## Canonical sources (bookmark these, ignore everything else)
 
 - Repo: <https://github.com/openclaw/openclaw>
