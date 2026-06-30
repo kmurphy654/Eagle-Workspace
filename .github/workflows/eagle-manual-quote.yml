@@ -30,6 +30,10 @@ on:
         description: 'Garage with living space above? (yes/no)'
         required: false
         default: 'no'
+      warranty_type:
+        description: 'Warranty to attach: 4year, 2year, or none'
+        required: false
+        default: '4year'
       notes:
         description: 'Any extra notes for the email body'
         required: false
@@ -77,11 +81,14 @@ jobs:
             STEP 2 — COPY TEMPLATES:
             Run these Bash commands:
               cp "eagle-tools/templates/Blank with signature.pdf" /tmp/blank_sig.pdf
-              cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
               cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+            Warranty type: ${{ inputs.warranty_type }}
+            - If "4year": cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+            - If "2year": cp "eagle-tools/templates/2.7 WARRANTY.pdf" /tmp/warranty_template.pdf
+            - If "none": skip warranty copy, no warranty PDF will be generated
 
             STEP 3 — GENERATE PDFs:
-            Run:
+            Always generate proposal:
               python eagle-tools/make_proposal.py \
                 --name "CUSTOMER_NAME" \
                 --addr "STREET_ADDRESS" \
@@ -94,6 +101,7 @@ jobs:
                 --out /tmp/proposal.pdf \
                 [--central if garage flag is yes]
 
+            Only generate warranty and external sheet if warranty_type is NOT "none":
               python eagle-tools/make_warranty.py \
                 --addr "STREET_ADDRESS, TOWN, MA" \
                 --template-warranty /tmp/warranty_template.pdf \
@@ -116,21 +124,20 @@ jobs:
                 Proposal price: $PRICE
                 This price includes all labor, materials, and our standard warranty.
 
-                Please review the attached proposal and warranty documents. If you have any questions or would like to schedule your installation, please reply to this email or call us directly.
+                Please review the attached documents. If you have any questions or would like to schedule your installation, please reply to this email or call us directly.
 
                 We look forward to working with you.
 
                 Kevin Murphy
                 Eagle Environmental
-                (781) 718-4734
+                (508) 393-7633
                 eagle82nd@gmail.com
 
                 [Add any extra notes from the notes field if provided]
 
-            Attach all three PDFs:
-              - proposal.pdf (mimeType: application/pdf)
-              - warranty.pdf (mimeType: application/pdf)
-              - external.pdf (mimeType: application/pdf)
+            Attachments:
+            - Always attach proposal.pdf
+            - If warranty_type is NOT "none": also attach warranty.pdf and external.pdf
 
             STEP 5 — NOTIFY:
             Send one PushNotification confirming the draft was created with the customer name and address.

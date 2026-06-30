@@ -202,6 +202,18 @@
   </div>
 
   <div class="card">
+    <h2>Warranty</h2>
+    <div class="field">
+      <label>Which warranty to attach?</label>
+      <select id="warranty_type">
+        <option value="4year">4-Year Warranty</option>
+        <option value="2year">2.6-Year Warranty</option>
+        <option value="none">No Warranty</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="token_card" class="card" style="display:none;">
     <h2>GitHub Token</h2>
     <div class="field">
       <input type="password" id="github_token" placeholder="ghp_..." autocomplete="off">
@@ -210,7 +222,7 @@
   </div>
 
   <button class="btn btn-primary" onclick="submitManual()">Create Draft in Gmail</button>
-  <button class="btn btn-secondary" onclick="clearToken()">Clear saved token</button>
+  <button class="btn btn-secondary" onclick="resetToken()">Reset saved token</button>
 
   <div id="status" class="status"></div>
 
@@ -222,13 +234,19 @@
 
     window.onload = function() {
       const saved = localStorage.getItem('eagle_gh_token');
-      if (saved) document.getElementById('github_token').value = saved;
+      if (saved) {
+        document.getElementById('github_token').value = saved;
+        document.getElementById('token_card').style.display = 'none';
+      } else {
+        document.getElementById('token_card').style.display = 'block';
+      }
     };
 
-    function clearToken() {
+    function resetToken() {
       localStorage.removeItem('eagle_gh_token');
       document.getElementById('github_token').value = '';
-      showStatus('Token cleared.', 'loading');
+      document.getElementById('token_card').style.display = 'block';
+      showStatus('Token cleared. Enter new token above.', 'loading');
     }
 
     function showStatus(msg, type) {
@@ -238,33 +256,42 @@
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
+    // Simple parser for natural language input
     function parseQuickText(text) {
       const result = {
         customer_name: '', customer_email: '', street_address: '',
         town: '', year_built: '', sqft: '', radon_level: '', central_flag: 'no', notes: ''
       };
 
+      // Email
       const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
       if (emailMatch) result.customer_email = emailMatch[0];
 
+      // Year built (4-digit year 1900-2026)
       const yearMatch = text.match(/\b(19[0-9]{2}|20[0-2][0-9])\b/);
       if (yearMatch) result.year_built = yearMatch[1];
 
+      // Sq ft (number followed by sqft/sq ft/sf)
       const sqftMatch = text.match(/(\d{3,5})\s*(?:sq\.?\s*ft|sqft|sf)\b/i);
       if (sqftMatch) result.sqft = sqftMatch[1];
 
+      // Radon (number followed by pci/pCi/pcil)
       const radonMatch = text.match(/([\d.]+)\s*(?:pci|pcil|pCi\/L|pCi)/i);
       if (radonMatch) result.radon_level = radonMatch[1];
 
+      // Garage/central
       if (/garage|central|living above/i.test(text)) result.central_flag = 'yes';
 
+      // MA towns — extract "X, MA" or "X MA" or just known patterns
       const townMatch = text.match(/,\s*([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*(?:,\s*MA|MA)?\s*(?:,|built|\d{4}|$)/i)
                      || text.match(/([A-Z][a-z]+(?:\s[A-Z][a-z]+)?),?\s*MA\b/i);
       if (townMatch) result.town = townMatch[1].trim();
 
+      // Street address — look for number + street name
       const addrMatch = text.match(/\b(\d+\s+[A-Za-z]+(?:\s+[A-Za-z]+){0,3}(?:\s+(?:St|Street|Dr|Drive|Rd|Road|Ave|Avenue|Ln|Lane|Way|Blvd|Ct|Court|Pl|Place)\.?))\b/i);
       if (addrMatch) result.street_address = addrMatch[1].trim();
 
+      // Name — first two capitalized words before email/address
       const beforeEmail = text.split(/[\w.+-]+@/)[0];
       const nameMatch = beforeEmail.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/);
       if (nameMatch) result.customer_name = nameMatch[1].trim();
@@ -278,6 +305,7 @@
 
       const parsed = parseQuickText(text);
 
+      // Show preview
       const preview = document.getElementById('parsed_preview');
       preview.style.display = 'block';
       preview.innerHTML = `
@@ -291,16 +319,19 @@
         <strong>Garage above:</strong> ${parsed.central_flag}
       `;
 
+      // Fill manual fields too
       Object.keys(parsed).forEach(k => {
         const el = document.getElementById(k);
         if (el) el.value = parsed[k];
       });
 
+      parsed.warranty_type = document.getElementById('warranty_type').value;
+
       const missing = ['customer_name','customer_email','street_address','town','year_built']
         .filter(k => !parsed[k]);
 
       if (missing.length) {
-        showStatus('Missing: ' + missing.map(k => k.replace(/_/g,' ')).join(', ') + '. Fill in below then tap Create Draft.', 'error');
+        showStatus('Missing: ' + missing.map(k => k.replace('_',' ')).join(', ') + '. Check fields below and fill in manually, then tap Create Draft.', 'error');
         return;
       }
 
@@ -317,6 +348,7 @@
         sqft: document.getElementById('sqft').value.trim(),
         radon_level: document.getElementById('radon_level').value.trim(),
         central_flag: document.getElementById('central_flag').value,
+        warranty_type: document.getElementById('warranty_type').value,
         notes: document.getElementById('notes').value.trim()
       };
 
@@ -334,6 +366,7 @@
       const token = document.getElementById('github_token').value.trim();
       if (!token) { showStatus('Please enter your GitHub token.', 'error'); return; }
       localStorage.setItem('eagle_gh_token', token);
+      document.getElementById('token_card').style.display = 'none';
 
       showStatus('Sending... draft will be in Gmail in ~2 minutes.', 'loading');
 
