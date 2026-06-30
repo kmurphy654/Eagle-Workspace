@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install PDF generation dependencies
-        run: pip install pypdfium2 reportlab pypdf
+        run: pip install pypdfium2 reportlab pypdf google-auth google-api-python-client
 
       - name: Run Eagle Daily Quote Scan
         uses: anthropics/claude-code-action@beta
@@ -43,7 +43,14 @@ jobs:
 
             STEP 2 — SKIP: Any thread already carrying Label_22, Label_23, Label_24, Label_25, or Label_26 is already processed — skip it entirely.
 
-            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): For each remaining thread, search the eagle82nd Google Calendar (wide window — 90 days back through 180 days forward) by the homeowner's PHONE NUMBER, STREET NAME, and FIRST NAME using mcp__Google_Calendar__list_events with fullText. If any match is found, skip that lead entirely — it is already in the pipeline. List skipped leads in the summary under "Already on calendar — skipped."
+            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): For each remaining thread, query the eagle82nd@gmail.com Google Calendar using the Google Calendar REST API with the service account credentials in $GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON. Use Bash with Python to do this:
+              1. Write the service account JSON to /tmp/svc_account.json from the env var
+              2. Use the google-auth and googleapiclient libraries (pip install google-auth google-api-python-client) to authenticate and list events
+              3. Search a wide window — 90 days back through 180 days forward
+              4. For each lead, check if any calendar event contains the homeowner's PHONE NUMBER, STREET NAME, or FIRST NAME (case-insensitive substring match on event summary and description)
+              5. If any match found, skip that lead entirely — it is already in the pipeline
+              List skipped leads in the summary under "Already on calendar — skipped."
+              If $GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON is empty or auth fails, note "Calendar check skipped — credentials not configured" and continue.
 
             STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
 
@@ -120,3 +127,4 @@ jobs:
           GOOGLE_CALENDAR_MCP_CREDENTIALS: ${{ secrets.GOOGLE_CALENDAR_MCP_CREDENTIALS }}
           DROPBOX_MCP_CREDENTIALS: ${{ secrets.DROPBOX_MCP_CREDENTIALS }}
           EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}
+          GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON }}
