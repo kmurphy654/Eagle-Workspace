@@ -28,14 +28,15 @@
   {
     "last_name": "Murphy",
     "first_name": "Renee",
-    "email": "renee.morgan.murphy@gmal.com",
-    "street_addr": "60 Whipple Hill",
-    "town": "Renee Murp, MA",
+    "email": "renee.morgan.murphy@gmail.com",
+    "street_addr": "60 Whipple Hill Rd",
+    "town": "Richmond",
     "fan": "GX5A",
     "pipe": "3\"",
     "price": 1650,
     "date_quoted": "2026-06-30",
     "draft_sent": false,
+    "warranty_type": "2year",
     "source": "manual"
   }
 ]
