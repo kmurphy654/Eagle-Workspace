@@ -122,29 +122,33 @@ jobs:
               entirely — do NOT create a draft, do NOT put commands in the email body.
               Log the failure in the summary instead.
 
+              Name output files using the street address so they are identifiable in Gmail.
+              Derive a slug: CamelCase street name + house number, no spaces.
+              Examples: "60 Whipple Hill" → WhippleHill60, "26 Long Hill Dr" → LongHillDr26
+
               Run these Bash commands (substitute actual values):
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
                   --pipe PIPE_SIZE --fan FAN_MODEL --price PRICE --date TODAY_DATE \
                   --template /tmp/blank_sig.pdf \
-                  --out /tmp/proposal_LASTNAME.pdf \
+                  --out /tmp/{SLUG}_Proposal.pdf \
                   [--central if applicable]
                 python eagle-tools/make_warranty.py \
                   --addr "STREET ADDRESS, TOWN, MA" \
                   --template-warranty /tmp/warranty_template.pdf \
                   --template-external /tmp/external_template.pdf \
-                  --out-warranty /tmp/warranty_LASTNAME.pdf \
-                  --out-external /tmp/external_LASTNAME.pdf
+                  --out-warranty /tmp/{SLUG}_Warranty.pdf \
+                  --out-external /tmp/{SLUG}_ExternalSheet.pdf
 
               After both commands succeed, verify the output files exist:
-                ls -la /tmp/proposal_LASTNAME.pdf /tmp/warranty_LASTNAME.pdf /tmp/external_LASTNAME.pdf
+                ls -la /tmp/{SLUG}_Proposal.pdf /tmp/{SLUG}_Warranty.pdf /tmp/{SLUG}_ExternalSheet.pdf
 
               If any file is missing, skip this lead — do NOT create a draft.
 
               Then read each output PDF with Bash to get base64:
-                base64 -w0 /tmp/proposal_LASTNAME.pdf
-                base64 -w0 /tmp/warranty_LASTNAME.pdf
-                base64 -w0 /tmp/external_LASTNAME.pdf
+                base64 -w0 /tmp/{SLUG}_Proposal.pdf
+                base64 -w0 /tmp/{SLUG}_Warranty.pdf
+                base64 -w0 /tmp/{SLUG}_ExternalSheet.pdf
 
               Create a Gmail draft addressed TO the customer's email (NOT a reply to webadmin).
               Subject: Radon Mitigation Proposal — STREET ADDRESS, TOWN
@@ -154,10 +158,10 @@ jobs:
               PIPE_SIZEin PVC pipe. Proposal price: $PRICE. This includes all labor, materials,
               and our standard warranty. Please reply or call (508) 393-7633 to schedule.
               Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
-              Attach all three PDFs using the attachments field:
-                - proposal_LASTNAME.pdf (mimeType: application/pdf)
-                - warranty_LASTNAME.pdf (mimeType: application/pdf)
-                - external_LASTNAME.pdf (mimeType: application/pdf)
+              Attach all three PDFs using the attachments field (use the {SLUG}-based filenames):
+                - {SLUG}_Proposal.pdf (mimeType: application/pdf)
+                - {SLUG}_Warranty.pdf (mimeType: application/pdf)
+                - {SLUG}_ExternalSheet.pdf (mimeType: application/pdf)
               Apply Label_25 ("Auto-quote ready (review)") to the thread.
               Record each quote in pending-quotes.json (create or append) with fields:
                 last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false

@@ -93,6 +93,10 @@ jobs:
             - If "none": skip warranty copy, no warranty PDF will be generated
 
             STEP 3 — GENERATE PDFs:
+            Name the output files using the street address so they are identifiable in Gmail.
+            Derive a short address slug: CamelCase street name + house number, no spaces.
+            Examples: "60 Whipple Hill" → WhippleHill60, "26 Long Hill Dr" → LongHillDr26
+
             Always generate proposal:
               python eagle-tools/make_proposal.py \
                 --name "CUSTOMER_NAME" \
@@ -103,7 +107,7 @@ jobs:
                 --price PRICE \
                 --date TODAY_DATE \
                 --template /tmp/blank_sig.pdf \
-                --out /tmp/proposal.pdf \
+                --out /tmp/{SLUG}_Proposal.pdf \
                 [--central if garage flag is yes]
 
             Only generate warranty and external sheet if warranty_type is NOT "none":
@@ -111,11 +115,11 @@ jobs:
                 --addr "STREET_ADDRESS, TOWN, MA" \
                 --template-warranty /tmp/warranty_template.pdf \
                 --template-external /tmp/external_template.pdf \
-                --out-warranty /tmp/warranty.pdf \
-                --out-external /tmp/external.pdf
+                --out-warranty /tmp/{SLUG}_Warranty.pdf \
+                --out-external /tmp/{SLUG}_ExternalSheet.pdf
 
             STEP 4 — CREATE GMAIL DRAFT:
-            Read each PDF with: base64 -w0 /tmp/proposal.pdf (etc.)
+            Read each PDF with: base64 -w0 /tmp/{SLUG}_Proposal.pdf (etc.)
             Create a Gmail draft with:
               To: CUSTOMER_EMAIL
               Subject: Radon Mitigation Proposal — STREET_ADDRESS, TOWN
@@ -140,9 +144,9 @@ jobs:
 
                 [Add any extra notes from the notes field if provided]
 
-            Attachments:
-            - Always attach proposal.pdf
-            - If warranty_type is NOT "none": also attach warranty.pdf and external.pdf
+            Attachments (use the {SLUG}-based filenames):
+            - Always attach {SLUG}_Proposal.pdf
+            - If warranty_type is NOT "none": also attach {SLUG}_Warranty.pdf and {SLUG}_ExternalSheet.pdf
 
             STEP 5 — RECORD IN PENDING QUOTES:
             Read pending-quotes.json from the repo (it may already exist with entries from the
