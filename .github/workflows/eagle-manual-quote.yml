@@ -34,6 +34,10 @@ on:
         description: 'Warranty to attach: 4year, 2year, or none'
         required: false
         default: '4year'
+      price_override:
+        description: 'Override price (e.g. 1750) — leave blank to use standard pricing'
+        required: false
+        default: ''
       notes:
         description: 'Any extra notes for the email body'
         required: false
@@ -70,13 +74,14 @@ jobs:
             - Living area sq ft: ${{ inputs.sqft || 'unknown' }}
             - Radon level: ${{ inputs.radon_level || 'unknown' }} pCi/L
             - Garage with living space above: ${{ inputs.central_flag }}
+            - Price override: ${{ inputs.price_override || 'none' }}
             - Notes: ${{ inputs.notes || 'none' }}
 
             STEP 1 — DETERMINE FAN AND PRICE:
             - Fan model: RP145 if built 2000 or newer; GX5A if older
             - Pipe size: 3" standard; 4" if living area > 3,500 sq ft
-            - Base price: $1,650; $2,250 if living area > 3,500 sq ft
-            - Add $100 if address is in: North Shore, far Greater Boston edges, South Coast, Cape Cod, or southeastern MA
+            - If price override is set (not "none"), use that exact number as the price. Do NOT apply any standard pricing or distance adder.
+            - Otherwise: Base price: $1,650; $2,250 if living area > 3,500 sq ft; add $100 if address is in: North Shore, far Greater Boston edges, South Coast, Cape Cod, or southeastern MA
 
             STEP 2 — COPY TEMPLATES:
             Run these Bash commands:

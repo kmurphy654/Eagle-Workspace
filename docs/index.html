@@ -218,6 +218,14 @@
   </div>
 
   <div class="card">
+    <h2>Pricing (optional)</h2>
+    <div class="field">
+      <label>Price Override — leave blank for standard pricing</label>
+      <input type="number" id="price_override" placeholder="e.g. 1750" min="0">
+    </div>
+  </div>
+
+  <div class="card">
     <h2>Notes (optional)</h2>
     <div class="field">
       <textarea class="notes-textarea" id="notes" placeholder="Extra details for the email..."></textarea>
@@ -390,7 +398,7 @@
       if (!_parsedData) return;
       _parsedData.warranty_type = document.getElementById('quick_warranty').value;
       // Merge any manual edits
-      ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','central_flag','notes'].forEach(k => {
+      ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','central_flag','price_override','notes'].forEach(k => {
         const el = document.getElementById(k);
         if (el && el.value.trim()) _parsedData[k] = el.value.trim();
       });
@@ -410,6 +418,7 @@
         radon_level: document.getElementById('radon_level').value.trim(),
         central_flag: document.getElementById('central_flag').value,
         warranty_type: document.getElementById('warranty_type').value,
+        price_override: document.getElementById('price_override').value.trim(),
         notes: document.getElementById('notes').value.trim()
       };
 
@@ -447,7 +456,7 @@
 
         if (response.status === 204) {
           showStatus('Done! Draft for ' + inputs.customer_name + ' will be in Gmail in about 2 minutes.', 'success');
-          ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','notes'].forEach(id => {
+          ['customer_name','customer_email','street_address','town','year_built','sqft','radon_level','price_override','notes'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
           });
