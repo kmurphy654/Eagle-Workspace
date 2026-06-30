@@ -474,6 +474,7 @@
         return;
       }
       if (isListening) {
+        isListening = false;
         recognition.stop();
         return;
       }
