@@ -122,9 +122,9 @@ jobs:
               entirely — do NOT create a draft, do NOT put commands in the email body.
               Log the failure in the summary instead.
 
-              Name output files using the street address so they are identifiable in Gmail.
-              Derive a slug: CamelCase street name + house number, no spaces.
-              Examples: "60 Whipple Hill" → WhippleHill60, "26 Long Hill Dr" → LongHillDr26
+              Name output files using the street address and town so they are identifiable in Gmail.
+              Derive a slug: CamelCase street name + house number + town (lowercase, no spaces).
+              Examples: "60 Whipple Hill, Grafton" → WhippleHill60grafton, "26 Long Hill Dr, Leominster" → LongHillDr26leominster
 
               Run these Bash commands (substitute actual values):
                 python eagle-tools/make_proposal.py \

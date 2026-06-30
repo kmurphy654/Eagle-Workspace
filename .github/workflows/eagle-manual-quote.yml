@@ -93,9 +93,9 @@ jobs:
             - If "none": skip warranty copy, no warranty PDF will be generated
 
             STEP 3 — GENERATE PDFs:
-            Name the output files using the street address so they are identifiable in Gmail.
-            Derive a short address slug: CamelCase street name + house number, no spaces.
-            Examples: "60 Whipple Hill" → WhippleHill60, "26 Long Hill Dr" → LongHillDr26
+            Name the output files using the street address and town so they are identifiable in Gmail.
+            Derive a slug: CamelCase street name + house number + town (lowercase, no spaces).
+            Examples: "60 Whipple Hill, Grafton" → WhippleHill60grafton, "26 Long Hill Dr, Leominster" → LongHillDr26leominster
 
             Always generate proposal:
               python eagle-tools/make_proposal.py \
