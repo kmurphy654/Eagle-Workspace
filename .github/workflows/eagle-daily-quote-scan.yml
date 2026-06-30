@@ -91,7 +91,7 @@ jobs:
             STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
 
             STEP 3 — CLASSIFY each remaining thread into one of:
-            - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,750 base; $2,350 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
+            - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
             - ADD-A-FAN: existing passive radon pipe present, just needs a fan added.
             - NEEDS INFO: missing critical information (no street address, unclear foundation type, etc.).
             - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
@@ -114,10 +114,6 @@ jobs:
               Then read each output PDF with Bash (base64 -w0) to get the base64 content.
               Create a Gmail draft addressed TO the customer's email (not a reply to webadmin).
               Include fan model, pipe size, price, and any relevant notes in the body.
-              Close the email body with:
-                Best regards,
-                Eagle Environmental
-                (508) 393-7633
               Attach all three PDFs using the attachments field:
                 - proposal_LASTNAME.pdf (mimeType: application/pdf)
                 - warranty_LASTNAME.pdf (mimeType: application/pdf)
@@ -129,7 +125,18 @@ jobs:
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
-            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1.
+            STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads.
+
+            Also include an "OPEN QUOTES BY AREA" section: read pending-quotes.json (if it exists) and list all entries where draft_sent is false. Group them by general geographic area using the town field — use these groupings:
+              - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville
+              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen
+              - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield
+              - South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
+              - Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
+              - Any town not matching above: group under "Other"
+            For each group with open quotes, list: customer name, address, town, price, date quoted. If pending-quotes.json doesn't exist or is empty, write "No open quotes."
+
+            Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1.
 
             STEP 6 — EMAIL SUMMARY: Use Bash to send a summary email via Gmail SMTP.
             Compose a plain-text email with:
@@ -141,6 +148,7 @@ jobs:
                 - names and addresses of any auto-quote drafts created (ready to review in Gmail)
                 - any aged-out leads
                 - note if iMessage check was skipped
+                - OPEN QUOTES BY AREA section (same groupings as above — all pending-quotes.json entries where draft_sent is false, grouped by region)
             Send using curl with Gmail SMTP:
               curl --ssl-reqd \
                 --url "smtps://smtp.gmail.com:465" \
