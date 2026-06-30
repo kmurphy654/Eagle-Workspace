@@ -26,18 +26,18 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           model: claude-sonnet-4-6
           mode: agent
-          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,mcp__Dropbox__download_link,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          allowed_tools: "mcp__Gmail__search_threads,mcp__Gmail__get_thread,mcp__Gmail__list_labels,mcp__Gmail__label_thread,mcp__Gmail__label_message,mcp__Gmail__unlabel_thread,mcp__Gmail__create_draft,mcp__Google_Calendar__list_events,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
           direct_prompt: |
             Run the Eagle Environmental DAILY QUOTE SCAN for eagle82nd@gmail.com.
 
             Today's date: use the current system date.
 
-            STEP 0 — SETUP: Download the three PDF templates from Dropbox using mcp__Dropbox__download_link, then curl each download_url to save locally:
-              - "/_A-Z forms/Blank with signature.pdf" → /tmp/blank_sig.pdf
-              - "/_A-Z forms/4 Warranty.pdf"           → /tmp/warranty_template.pdf
-              - "/_A-Z forms/External Radon System Sheet.pdf" → /tmp/external_template.pdf
-            Use Bash to curl each URL: curl -L -o /tmp/blank_sig.pdf "<url>" (etc.)
-            These templates are needed to generate PDFs for each auto-quote.
+            STEP 0 — SETUP: Copy the PDF templates from the repo into /tmp:
+              cp "eagle-tools/templates/Blank with signature.pdf" /tmp/blank_sig.pdf
+              cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+              cp "eagle-tools/templates/2.7 WARRANTY.pdf" /tmp/warranty_26_template.pdf
+              cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+            Use Bash to run those cp commands. These templates are needed to generate PDFs for each auto-quote.
 
             STEP 1 — GATHER: Search Gmail for all threads from webadmin@radonremover.com in the inbox.
 
