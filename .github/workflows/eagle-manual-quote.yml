@@ -139,7 +139,27 @@ jobs:
             - Always attach proposal.pdf
             - If warranty_type is NOT "none": also attach warranty.pdf and external.pdf
 
-            STEP 5 — NOTIFY:
+            STEP 5 — RECORD IN PENDING QUOTES:
+            Read pending-quotes.json from the repo (it may already exist with entries from the
+            daily scan). If it doesn't exist, start with an empty array [].
+            Append one entry for this quote:
+              {
+                "last_name": "LAST NAME",
+                "first_name": "FIRST NAME",
+                "email": "CUSTOMER EMAIL",
+                "street_addr": "STREET ADDRESS",
+                "town": "TOWN",
+                "fan": "FAN MODEL",
+                "pipe": "PIPE SIZE",
+                "price": PRICE_AS_NUMBER,
+                "date_quoted": "TODAY_DATE",
+                "draft_sent": false,
+                "source": "manual"
+              }
+            Write the updated array back to pending-quotes.json.
+            Commit and push pending-quotes.json to branch claude/eagle-daily-quote-scan-8kp0b1.
+
+            STEP 6 — NOTIFY:
             Send one PushNotification confirming the draft was created with the customer name and address.
 
             ABSOLUTE RULES:
