@@ -136,7 +136,7 @@
   <!-- QUICK MODE -->
   <div class="card">
     <h2>Quick — Just Say It</h2>
-    <div class="hint">Speak or type naturally. Example:<br>"John Smith, john@gmail.com, 47 Maple St Medford, built 2003, 1800 sqft, 4.2 pCi"</div>
+    <div class="hint">Speak or type naturally. Example:<br>"John Smith, john@gmail.com, 47 Maple St Medford MA, built 2003, 1800 sqft, 4.2 pCi"</div>
     <div class="field">
       <textarea class="quick-textarea" id="quick_text" placeholder="Tap mic and speak, or type here..."></textarea>
     </div>
@@ -207,7 +207,7 @@
       <label>Which warranty to attach?</label>
       <select id="warranty_type">
         <option value="4year">4-Year Warranty</option>
-        <option value="2year">2.6-Year Warranty</option>
+        <option value="2year">2.7 Warranty</option>
         <option value="none">No Warranty</option>
       </select>
     </div>
@@ -280,8 +280,8 @@
       const sqftMatch = text.match(/(\d{3,5})\s*(?:sq\.?\s*ft|sqft|sf)\b/i);
       if (sqftMatch) result.sqft = sqftMatch[1];
 
-      // Radon
-      const radonMatch = text.match(/([\d.]+)\s*(?:pci|pcil|pCi\/L|pCi)/i);
+      // Radon — matches pCi/L, pCi, pci, pcil, pcl (common speech variants)
+      const radonMatch = text.match(/([\d.]+)\s*(?:pci\/l|pcil|pci|pcl)/i);
       if (radonMatch) result.radon_level = radonMatch[1];
 
       // Garage/central
@@ -291,15 +291,17 @@
       const addrMatch = text.match(/\b(\d+\s+[a-z]+(?:\s+[a-z]+){0,4}(?:\s+(?:st|street|dr|drive|rd|road|ave|avenue|ln|lane|way|blvd|ct|court|pl|place|hill|brook|lake|park|view|ridge|glen|wood|mills|point|run|trail|circle|cir)\.?))\b/i);
       if (addrMatch) result.street_address = toTitleCase(addrMatch[1].trim());
 
-      // Town — "X MA" pattern first; then word right after address; then before built/year
-      const townWithMA = text.match(/([a-z]+(?:\s+[a-z]+)?),?\s*ma\b/i);
-      if (townWithMA) {
-        result.town = toTitleCase(townWithMA[1].trim());
+      // Town — look for "TownName STATE" where state is any 2-letter abbreviation,
+      // or word right after address followed by state/email/year/comma/end
+      const STATE = '(?:ma|nh|ct|vt|me|ri|ny|ca|fl|tx|[a-z]{2})';
+      const townWithState = text.match(new RegExp('([a-z]+(?:\\s+[a-z]+)?)\\s*,?\\s*' + STATE + '\\b', 'i'));
+      if (townWithState) {
+        result.town = toTitleCase(townWithState[1].trim());
       } else if (result.street_address) {
         const addrLow = result.street_address.toLowerCase();
         const addrIdx = text.toLowerCase().indexOf(addrLow);
         const afterAddr = text.slice(addrIdx + addrLow.length);
-        const townAfter = afterAddr.match(/^\s*,?\s*([a-z]+(?:\s+[a-z]+)?)\s*(?:,|built|\d{4}|$)/i);
+        const townAfter = afterAddr.match(/^\s*,?\s*([a-z]+(?:\s+[a-z]+)?)\s*(?:,|\b[a-z]{2}\b|built|\d{4}|[\w.]+@|$)/i);
         if (townAfter) result.town = toTitleCase(townAfter[1].trim());
       } else {
         const townBefore = text.match(/,\s*([a-z]+(?:\s+[a-z]+)?)\s*(?:,|built|\d{4})/i);
