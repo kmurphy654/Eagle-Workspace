@@ -91,7 +91,7 @@ jobs:
             STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
 
             STEP 3 — CLASSIFY each remaining thread into one of:
-            - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
+            - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,750 base; $2,350 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
             - ADD-A-FAN: existing passive radon pipe present, just needs a fan added.
             - NEEDS INFO: missing critical information (no street address, unclear foundation type, etc.).
             - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
@@ -114,6 +114,10 @@ jobs:
               Then read each output PDF with Bash (base64 -w0) to get the base64 content.
               Create a Gmail draft addressed TO the customer's email (not a reply to webadmin).
               Include fan model, pipe size, price, and any relevant notes in the body.
+              Close the email body with:
+                Best regards,
+                Eagle Environmental
+                (508) 393-7633
               Attach all three PDFs using the attachments field:
                 - proposal_LASTNAME.pdf (mimeType: application/pdf)
                 - warranty_LASTNAME.pdf (mimeType: application/pdf)
