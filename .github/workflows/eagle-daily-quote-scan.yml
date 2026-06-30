@@ -20,6 +20,49 @@ jobs:
       - name: Install PDF generation dependencies
         run: pip install pypdfium2 reportlab pypdf google-auth google-api-python-client
 
+      - name: Fetch Google Calendar events
+        env:
+          GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, datetime
+          svc_json = os.environ.get('GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON', '').strip()
+          if not svc_json:
+              print("CALENDAR_STATUS=skipped: no credentials")
+              open('/tmp/calendar_events.json','w').write(json.dumps({"status":"skipped","events":[]}))
+          else:
+              try:
+                  from google.oauth2 import service_account
+                  from googleapiclient.discovery import build
+                  creds = service_account.Credentials.from_service_account_info(
+                      json.loads(svc_json),
+                      scopes=['https://www.googleapis.com/auth/calendar.readonly']
+                  )
+                  service = build('calendar','v3',credentials=creds)
+                  now = datetime.datetime.utcnow()
+                  time_min = (now - datetime.timedelta(days=90)).isoformat() + 'Z'
+                  time_max = (now + datetime.timedelta(days=180)).isoformat() + 'Z'
+                  all_events = []
+                  page_token = None
+                  while True:
+                      result = service.events().list(
+                          calendarId='eagle82nd@gmail.com',
+                          timeMin=time_min, timeMax=time_max,
+                          singleEvents=True, maxResults=500,
+                          pageToken=page_token
+                      ).execute()
+                      all_events.extend(result.get('items', []))
+                      page_token = result.get('nextPageToken')
+                      if not page_token:
+                          break
+                  out = {"status":"ok","events":[{"summary":e.get("summary",""),"description":e.get("description",""),"start":e.get("start",{}).get("dateTime",e.get("start",{}).get("date",""))} for e in all_events]}
+                  open('/tmp/calendar_events.json','w').write(json.dumps(out))
+                  print(f"CALENDAR_STATUS=ok: fetched {len(all_events)} events")
+              except Exception as ex:
+                  print(f"CALENDAR_STATUS=error: {ex}")
+                  open('/tmp/calendar_events.json','w').write(json.dumps({"status":"error","error":str(ex),"events":[]}))
+          PYEOF
+
       - name: Run Eagle Daily Quote Scan
         uses: anthropics/claude-code-action@beta
         with:
@@ -43,14 +86,7 @@ jobs:
 
             STEP 2 — SKIP: Any thread already carrying Label_22, Label_23, Label_24, Label_25, or Label_26 is already processed — skip it entirely.
 
-            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): For each remaining thread, query the eagle82nd@gmail.com Google Calendar using the Google Calendar REST API with the service account credentials in $GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON. Use Bash with Python to do this:
-              1. Write the service account JSON to /tmp/svc_account.json from the env var
-              2. Use the google-auth and googleapiclient libraries (pip install google-auth google-api-python-client) to authenticate and list events
-              3. Search a wide window — 90 days back through 180 days forward
-              4. For each lead, check if any calendar event contains the homeowner's PHONE NUMBER, STREET NAME, or FIRST NAME (case-insensitive substring match on event summary and description)
-              5. If any match found, skip that lead entirely — it is already in the pipeline
-              List skipped leads in the summary under "Already on calendar — skipped."
-              If $GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON is empty or auth fails, note "Calendar check skipped — credentials not configured" and continue.
+            STEP 2b — CALENDAR CROSS-CHECK (CRITICAL): Read /tmp/calendar_events.json (already fetched by a prior workflow step). Parse the JSON — it has a "status" field ("ok", "skipped", or "error") and an "events" array where each event has "summary" and "description" fields. For each remaining lead, do a case-insensitive substring search across all event summaries and descriptions for the homeowner's PHONE NUMBER, STREET NAME, and FIRST NAME. If any match is found, skip that lead — it is already in the pipeline. List skipped leads under "Already on calendar — skipped." If status is not "ok", note the reason and continue without skipping anyone.
 
             STEP 2c — TEXT CONTACT CHECK: If iMessage/Messages MCP tools are available in this environment, search Messages for the homeowner's PHONE NUMBER. If there is an active or recent text exchange within the last 14 days (either direction), skip that lead — it is already in personal contact. List skipped leads in the summary under "Already in text contact — skipped (handle personally)" with the date of the last message. If iMessage access is not available on this machine, note "iMessage check skipped — not available in this environment" in the summary and continue.
 
