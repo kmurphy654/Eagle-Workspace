@@ -150,6 +150,51 @@ openclaw logs            # watch what it's actually doing
 - [ ] Before *ever* exposing remotely, read the official Security runbook:
       <https://docs.openclaw.ai/gateway/security>
 
+---
+
+## Stopping runaway replies & runaway spend
+
+Two common first-time incidents and how to prevent them. (`dmPolicy` defaults to
+`pairing` on nearly every channel — including **SMS** — so an un-approved sender
+gets an auth-code reply by default. On an open channel like SMS that means
+*every spam text and unknown number* gets a code.)
+
+### Incident: "it texted an authentication code to everyone"
+
+That is `dmPolicy: pairing` working as designed, but it's too noisy for SMS.
+Switch the channel to an allowlist so unknown senders are **silently ignored**
+(no code, and no LLM tokens spent on them):
+
+```bash
+# values for SMS; swap `sms` for your channel (whatsapp, telegram, ...)
+openclaw config set channels.sms.dmPolicy allowlist
+openclaw config set channels.sms.dmAllowlist '["+1XXXXXXXXXX"]'   # your number(s), E.164
+openclaw doctor
+openclaw gateway restart
+```
+
+`dmPolicy` modes: `pairing` (default — code to strangers) · `allowlist` (only
+approved senders answered) · `open` (answer everyone — risky/expensive) ·
+`disabled` (ignore all DMs). Use `disabled` when running unattended.
+
+### Incident: "it ran out of API tokens"
+
+OpenClaw has **no built-in dollar cap**, so enforce spend at three layers:
+
+1. **Provider hard cap (most important).** Set a low monthly usage limit in your
+   LLM provider's billing console and disable auto-recharge. After that it
+   *cannot* spend more — worst case is "it stops replying," never a surprise
+   bill.
+   - Anthropic: console.anthropic.com → Billing → Usage limits
+   - OpenAI: platform.openai.com → Settings → Limits (set the *hard* limit)
+   - Identify your provider: `openclaw config get auth.profiles`
+2. **Limit who can spend it** — the allowlist above means only you/approved
+   contacts can trigger the agent at all.
+3. **Make tokens last** — default to a cheaper model and cap output length:
+   `openclaw config set models.providers.<provider>.maxTokens 1024`
+
+---
+
 ## Canonical sources (bookmark these, ignore everything else)
 
 - Repo: <https://github.com/openclaw/openclaw>
