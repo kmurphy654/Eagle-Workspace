@@ -480,7 +480,7 @@
       recognition = new SR();
       recognition.lang = 'en-US';
       recognition.continuous = true;
-      recognition.interimResults = false;
+      recognition.interimResults = true;
 
       recognition.onstart = () => {
         isListening = true;
@@ -488,9 +488,12 @@
         document.getElementById('mic_btn').textContent = '⏹';
       };
       recognition.onresult = (e) => {
-        const transcript = e.results[0][0].transcript;
-        const ta = document.getElementById('quick_text');
-        ta.value = (ta.value ? ta.value + ' ' : '') + transcript;
+        // Build full transcript from all final results
+        let final = '';
+        for (let i = 0; i < e.results.length; i++) {
+          if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+        }
+        if (final.trim()) document.getElementById('quick_text').value = final.trim();
       };
       recognition.onerror = (e) => {
         showStatus('Mic error: ' + e.error, 'error');
