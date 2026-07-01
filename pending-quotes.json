@@ -1,31 +1,5 @@
 [
   {
-    "last_name": "Spicer",
-    "first_name": "Sandy",
-    "email": "Sandy.spicer@cbrealty.com",
-    "street_addr": "105 Main St",
-    "town": "Townsend, MA",
-    "fan": "GX5A",
-    "pipe": "3\"",
-    "price": 1750,
-    "date_quoted": "2026-06-30",
-    "draft_sent": false,
-    "notes": "Cape/Saltbox, ~1985, concrete foundation, radon 7 pCi/L, distance adder"
-  },
-  {
-    "last_name": "Montalbano",
-    "first_name": "Charles",
-    "email": "Charlie@m-csi.com",
-    "street_addr": "178 North Common",
-    "town": "Westminster, MA",
-    "fan": "GX5A",
-    "pipe": "3\"",
-    "price": 1750,
-    "date_quoted": "2026-06-30",
-    "draft_sent": false,
-    "notes": "Ranch, ~1965, concrete foundation, sump pump, radon 15.4 pCi/L, distance adder"
-  },
-  {
     "last_name": "Murphy",
     "first_name": "Renee",
     "email": "renee.morgan.murphy@gmail.com",
@@ -38,5 +12,84 @@
     "draft_sent": false,
     "warranty_type": "2year",
     "source": "manual"
+  },
+  {
+    "last_name": "Hu",
+    "first_name": "Michael",
+    "email": "michaelanhu@gmail.com",
+    "street_addr": "137 Winn St",
+    "town": "Burlington, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Gagnon",
+    "first_name": "Annie",
+    "email": "gagnona95@gmail.com",
+    "street_addr": "29 Station St",
+    "town": "Stoughton, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Arguelles",
+    "first_name": "Alan",
+    "email": "alainrarguelles@gmail.com",
+    "street_addr": "33 Red Bridge Lane",
+    "town": "South Hadley, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1750,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Spicer",
+    "first_name": "Sandy",
+    "email": "Sandy.spicer@cbrealty.com",
+    "street_addr": "105 Main St",
+    "town": "Townsend, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1750,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Montalbano",
+    "first_name": "Charles",
+    "email": "Charlie@m-csi.com",
+    "street_addr": "178 North Common",
+    "town": "Westminster, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1750,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Goldstein",
+    "first_name": "Tali",
+    "email": "Taliwarburg@gmail.com",
+    "street_addr": "38 Henderson Street",
+    "town": "Needham, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1150,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "none",
+    "type": "add-a-fan"
   }
 ]
