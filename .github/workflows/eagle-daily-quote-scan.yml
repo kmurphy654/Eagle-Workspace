@@ -116,6 +116,8 @@ jobs:
             - ADD-A-FAN QUOTE: home has an existing passive (fanless) radon pipe already
               installed, and the customer wants a fan added for the first time. No existing
               fan is present. This IS a quote.
+              Exception: if the submission mentions Toll Brothers or is a Toll Brothers
+              community home, classify as BRYAN instead (no proposal — handle personally).
             - NEEDS INFO: missing critical information (no street address, unclear foundation type, etc.).
             - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
             - AGED OUT: no reply in 14+ days from submission date.
@@ -173,13 +175,32 @@ jobs:
 
             - FAN SERVICE / REPAIR: List under BRYAN in the summary (Kevin handles personally).
               No draft, no PDF, no label change.
+              DROPBOX LOOKUP: Before logging this lead, search Dropbox for the customer's
+              street name using mcp__Dropbox__search to find any prior Eagle proposal on file.
+              Look for files whose name contains the street name or house number — focus on
+              files ending in P (Proposal), I (Install sheet), or S (Service record) that
+              match the address. If found, use mcp__Dropbox__download_link to get a download
+              URL, then: curl -L -o /tmp/prior_proposal.pdf "<url>"
+              Then run: python3 -c "
+              import pypdf, sys
+              r = pypdf.PdfReader('/tmp/prior_proposal.pdf')
+              text = ' '.join(p.extract_text() or '' for p in r.pages)
+              for fan in ['RP145','GX5A','HP220','HP225','RP145','RP145-2','SGX5','EZR']:
+                  if fan in text:
+                      print('FAN:', fan)
+                      break
+              else:
+                  print('FAN: not found in PDF')
+              "
+              Include the fan model result in the Bryan summary line for this lead so Kevin
+              knows what fan is installed. If no Dropbox file is found, note "no prior file found."
             - ADD-A-FAN QUOTE: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
-              Standard add-a-fan price: $850. Fan: RP145. Pipe: "" (existing pipe already there).
+              Price: $1,150 standard. Fan: RP145. Pipe: 3" (existing pipe already there).
               Generate the proposal PDF only (NO warranty or external sheet — fan addition has no warranty):
                 Derive the same address+town slug as auto-quotes.
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
-                  --pipe 3 --fan RP145 --price 850 --date TODAY_DATE \
+                  --pipe 3 --fan RP145 --price 1150 --date TODAY_DATE \
                   --template /tmp/blank_sig.pdf \
                   --out /tmp/{SLUG}_Proposal.pdf
                 Verify the file exists: ls -la /tmp/{SLUG}_Proposal.pdf
@@ -188,14 +209,14 @@ jobs:
                 Subject: Radon Fan Addition Proposal — STREET ADDRESS, TOWN
                 Body: Hi FIRST_NAME, thank you for reaching out to Eagle Environmental.
                 We can add a radon fan to your existing passive pipe system at STREET ADDRESS, TOWN, MA.
-                Price: $850. This includes the fan unit, installation, and all labor.
+                Price: $1,150. This includes the fan unit, installation, and all labor.
                 Please reply or call (508) 393-7633 to schedule.
                 Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
                 Attach: {SLUG}_Proposal.pdf
               Apply Label_25 to the thread.
               Record in pending-quotes.json:
-                last_name, first_name, email, street_addr, town, fan: "RP145", pipe: "",
-                price: 850, date_quoted: TODAY, draft_sent: false, warranty_type: "none", type: "add-a-fan"
+                last_name, first_name, email, street_addr, town, fan: "RP145", pipe: "3",
+                price: 1150, date_quoted: TODAY, draft_sent: false, warranty_type: "none", type: "add-a-fan"
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 
