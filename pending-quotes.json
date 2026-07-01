@@ -91,5 +91,19 @@
     "draft_sent": false,
     "warranty_type": "none",
     "type": "add-a-fan"
+  },
+  {
+    "last_name": "Renee",
+    "first_name": "I Want A Proposal For",
+    "email": "renee.morgan.murphy@gmail.com",
+    "street_addr": "60 Whipple Hill",
+    "town": "Richmond",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year",
+    "source": "manual"
   }
 ]
