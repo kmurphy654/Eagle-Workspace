@@ -252,23 +252,25 @@ jobs:
                 Format: Name — Address — reason it's urgent
                 If none, omit this section entirely.
 
-              SECTION 2 — OPEN QUOTES BY AREA (pending auto-quotes first, then Bryan by region):
+              SECTION 2 — OPEN QUOTES BY AREA:
+                One unified list. Combine ALL of the following into a single regional breakdown:
+                  - pending-quotes.json entries where draft_sent is false
+                  - Every lead classified as BRYAN, FAN SERVICE / REPAIR, or NEEDS INFO today
 
-                Part A — pending-quotes.json entries where draft_sent is false, grouped by region.
-                Each line: Name — Address, Town — $Price — [AUTO-QUOTE] or [FAN REQUEST]
-                For add-a-fan entries append "add-a-fan" after the tag.
+                Group by region (same regions as STEP 5). Within each region, list every lead on one line:
+                  Name — Address, Town — $Price or "site visit" — [TAG] brief note
 
-                Part B — "BRYAN leads for your review (N total + M fan service):"
-                Group Bryan/fan-service leads from today's scan under the same regional headings.
-                Each line: Name — Address, Town — site visit — [BRYAN] brief reason
-                Fan service lines include the fan model if found in Dropbox: [BRYAN] fan service, Eagle-installed, RP145 on file
-                Regions: MetroWest / Central MA | Greater Boston / Inner Suburbs |
-                         North Shore | South Shore / Cape & Islands |
-                         Metrowest South / 495 South | Other
-                Any Bryan lead whose town doesn't match a region goes under "Other."
+                Tags:
+                  [AUTO-QUOTE]   — standard radon system quote, draft ready
+                  [FAN REQUEST]  — add-a-fan quote, draft ready
+                  [BRYAN]        — needs site visit; add reason: stone foundation, crawlspace, additions, etc.
+                  [FAN SERVICE]  — service/repair call; add fan model if found in Dropbox
+                  [NEEDS INFO]   — missing address or unclear scope
 
-              Do NOT include Needs Info lists, aged-out lists, skip counts, or iMessage notes
-              in the email. Those belong in the .md summary file only.
+                If no entries at all, write "No open leads."
+
+              Do NOT include aged-out lists, skip counts, or iMessage notes in the email.
+              Those belong in the .md summary file only.
             Send using curl with Gmail SMTP:
               curl --ssl-reqd \
                 --url "smtps://smtp.gmail.com:465" \
