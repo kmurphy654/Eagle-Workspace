@@ -98,8 +98,8 @@ jobs:
 
             STEP 3 — GENERATE PDFs:
             Name the output files using the street address and town so they are identifiable in Gmail.
-            Derive a slug: CamelCase street name + house number + town (lowercase, no spaces).
-            Examples: "60 Whipple Hill, Grafton" → WhippleHill60grafton, "26 Long Hill Dr, Leominster" → LongHillDr26leominster
+            Derive a slug: CamelCase street name + house number + Town (TitleCase, no spaces).
+            Examples: "60 Whipple Hill, Grafton" → WhippleHill60Grafton, "26 Long Hill Dr, Leominster" → LongHillDr26Leominster
 
             Always generate proposal:
               python eagle-tools/make_proposal.py \
