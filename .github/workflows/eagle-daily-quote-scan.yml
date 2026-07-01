@@ -122,6 +122,14 @@ jobs:
             - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
             - AGED OUT: no reply in 14+ days from submission date.
 
+            CRITICAL — AS YOU CLASSIFY: For every lead classified as BRYAN, FAN SERVICE, or
+            NEEDS INFO, immediately append one line to /tmp/bryan_leads.txt in this format:
+              NAME|ADDRESS|TOWN|REASON
+            Example: Shannon Boeckelman|4 Mostika Rd|Woburn|stone foundation, radon 34 pCi/L
+            Do this during classification, not later. This file is the source of truth for
+            the email. If /tmp/bryan_leads.txt does not exist when you reach STEP 6, you
+            missed leads — go back and create it now before sending the email.
+
             STEP 4 — ACT:
             - CLEAN AUTO-QUOTE: For each lead, generate the three PDFs using Bash.
               CRITICAL: You MUST actually run each python command below with Bash and verify
@@ -276,8 +284,10 @@ jobs:
                   [FAN SERVICE]  — service/repair call; add fan model if found in Dropbox
                   [NEEDS INFO]   — missing address or unclear scope
 
-                IMPORTANT: Every BRYAN, FAN SERVICE, and NEEDS INFO lead from today's scan
-                MUST appear in this list under the correct region. Do not omit any.
+                For Bryan/Fan Service/Needs Info leads, read /tmp/bryan_leads.txt (written
+                during STEP 3). Parse each line (NAME|ADDRESS|TOWN|REASON) and place under
+                the correct region by matching TOWN against the lists above.
+                EVERY line in /tmp/bryan_leads.txt must appear in the email. Do not omit any.
                 If no entries at all, write "No open leads."
 
               Do NOT include aged-out lists, skip counts, or iMessage notes in the email.
