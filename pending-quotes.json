@@ -104,5 +104,19 @@
     "date_quoted": "2026-07-01",
     "draft_sent": false,
     "warranty_type": "4year"
+  },
+  {
+    "last_name": "of record",
+    "first_name": "owner",
+    "email": "raulmatos2theheritageco.com janisgately@gmail.com",
+    "street_addr": "36 Waterville",
+    "town": "Hopkinton, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1050,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year",
+    "source": "manual"
   }
 ]
