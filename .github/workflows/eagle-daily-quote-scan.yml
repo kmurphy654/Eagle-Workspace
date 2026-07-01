@@ -110,7 +110,12 @@ jobs:
 
             STEP 3 — CLASSIFY each remaining thread into one of:
             - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
-            - ADD-A-FAN: existing passive radon pipe present, just needs a fan added.
+            - FAN SERVICE / REPAIR: existing fan that is noisy, broken, not working, running
+              constantly, or needs replacement. Also: any request for service on an Eagle- or
+              non-Eagle-installed fan. These are service calls, NOT new-installation quotes.
+            - ADD-A-FAN QUOTE: home has an existing passive (fanless) radon pipe already
+              installed, and the customer wants a fan added for the first time. No existing
+              fan is present. This IS a quote.
             - NEEDS INFO: missing critical information (no street address, unclear foundation type, etc.).
             - BRYAN: stone/fieldstone/brick foundation; crawlspace; additions; split/bi-level slab; >30 pCi/L; Plymouth area; complex/multi-unit; anything requiring a site visit.
             - AGED OUT: no reply in 14+ days from submission date.
@@ -154,8 +159,8 @@ jobs:
               Subject: Radon Mitigation Proposal — STREET ADDRESS, TOWN
               Body: Hi FIRST_NAME, thank you for reaching out to Eagle Environmental. Please
               find attached our proposal for radon mitigation at STREET ADDRESS, TOWN, MA.
-              We will install a sub-slab depressurization system using a FAN_MODEL fan with
-              PIPE_SIZEin PVC pipe. Proposal price: $PRICE. This includes all labor, materials,
+              We will install a sub-slab depressurization system using a RadonAway fan with
+              PIPE_SIZE" PVC pipe. Proposal price: $PRICE. This includes all labor, materials,
               and our standard warranty. Please reply or call (508) 393-7633 to schedule.
               Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
               Attach all three PDFs using the attachments field (use the {SLUG}-based filenames):
@@ -166,7 +171,9 @@ jobs:
               Record each quote in pending-quotes.json (create or append) with fields:
                 last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false, warranty_type: "4year"
 
-            - ADD-A-FAN: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
+            - FAN SERVICE / REPAIR: List under BRYAN in the summary (Kevin handles personally).
+              No draft, no PDF, no label change.
+            - ADD-A-FAN QUOTE: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
               Standard add-a-fan price: $850. Fan: RP145. Pipe: "" (existing pipe already there).
               Generate the proposal PDF only (NO warranty or external sheet — fan addition has no warranty):
                 Derive the same address+town slug as auto-quotes.
