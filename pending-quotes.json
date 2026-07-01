@@ -14,19 +14,6 @@
     "source": "manual"
   },
   {
-    "last_name": "Figler",
-    "first_name": "Joseph",
-    "email": "jfigler@yahoo.com",
-    "street_addr": "346 Newton Street",
-    "town": "Brookline, MA",
-    "fan": "RP145",
-    "pipe": "3",
-    "price": 1650,
-    "date_quoted": "2026-07-01",
-    "draft_sent": false,
-    "warranty_type": "4year"
-  },
-  {
     "last_name": "Hu",
     "first_name": "Michael",
     "email": "michaelanhu@gmail.com",
@@ -58,12 +45,13 @@
     "email": "Taliwarburg@gmail.com",
     "street_addr": "38 Henderson Street",
     "town": "Needham, MA",
-    "fan": "GX5A",
-    "pipe": "4",
-    "price": 2250,
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1150,
     "date_quoted": "2026-07-01",
     "draft_sent": false,
-    "warranty_type": "4year"
+    "warranty_type": "none",
+    "type": "add-a-fan"
   },
   {
     "last_name": "Arguelles",
@@ -97,6 +85,19 @@
     "email": "Charlie@m-csi.com",
     "street_addr": "178 North Common",
     "town": "Westminster, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-01",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Panjwani",
+    "first_name": "Sharjeel",
+    "email": "sharjeel.panjwani@gmail.com",
+    "street_addr": "26 Hutchins Street",
+    "town": "Shrewsbury, MA",
     "fan": "RP145",
     "pipe": "3",
     "price": 1650,
