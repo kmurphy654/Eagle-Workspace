@@ -111,13 +111,13 @@ jobs:
             Run these Bash commands:
               cp "eagle-tools/templates/Blank with signature.pdf" /tmp/blank_sig.pdf
             If interior is "yes":
-              - Copy the interior system sheet from Dropbox: search Dropbox under "/_A-Z forms/" for a file
-                whose name contains "interior" and "system" or "diagram" (case-insensitive). Download it
-                using mcp__Dropbox__download_link and save to /tmp/external_template.pdf.
-                If no interior sheet is found in Dropbox, fall back to:
+              - Interior system sheet from Dropbox (exact path: "/_A-Z forms/Internal Radon System Sheet.pdf",
+                file_id: id:HIR4vMWqTuwAAAAAAAEAiA). Use mcp__Dropbox__download_link to get the URL,
+                then download to /tmp/external_template.pdf.
+                If Dropbox download fails, fall back to:
                 cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
-              - cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
-                (if this file does not exist, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
+              - cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+                (this is the "Cherry Palida" / standard 4 pCi/L warranty used for interior and fan cut-in jobs)
             Else:
               cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
               Warranty type: ${{ inputs.warranty_type }}

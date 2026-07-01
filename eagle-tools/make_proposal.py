@@ -63,8 +63,8 @@ def _pt(n):
     return f"{w} ({n})"
 
 if args.interior:
-    l1 = "Sub-slab depressurization system; fan installed in the attic, pipe routed through the roof."
-    l2 = "Exact location to be determined the day of installation."
+    l1 = "Zero (0) holes will be drilled in the foundation slab for this installation."
+    l2 = "Exact fan and pipe location to be determined the day of installation."
     l3 = "System guaranteed below 4.0 pCi/L.  5-year manufacturer's warranty on fan."
 elif args.points == 1:
     if args.central:

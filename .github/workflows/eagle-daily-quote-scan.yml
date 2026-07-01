@@ -113,10 +113,11 @@ jobs:
             - INTERIOR QUOTE: customer specifically requests or describes an interior/attic system
               (fan in attic, pipe through roof, no exterior pipe exit). These ARE quotable jobs.
               Price: same as CLEAN AUTO-QUOTE pricing. Fan: RP145 (2000+) or GX5A (pre-2000).
-              Pipe: 3" standard. Generate proposal with --interior flag. Warranty: Interior Warranty.
-              If Interior Warranty template does not exist, use 4 Warranty. Also attach the interior
-              system diagram sheet from Dropbox (search "/_A-Z forms/" for file containing "interior"
-              and "system" or "diagram"); if not found use External Radon System Sheet.
+              Pipe: 3" standard. Generate proposal with --interior flag.
+              Warranty: use "eagle-tools/templates/4 Warranty.pdf" (the "Cherry Palida" / standard 4 pCi/L warranty).
+              System sheet: use "Internal Radon System Sheet.pdf" from Dropbox at the exact path
+              "/_A-Z forms/Internal Radon System Sheet.pdf" (file_id: id:HIR4vMWqTuwAAAAAAAEAiA);
+              if not available fall back to "eagle-tools/templates/External Radon System Sheet.pdf".
             - FAN SERVICE / REPAIR: existing fan that is noisy, broken, not working, running
               constantly, or needs replacement. Also: any request for service on an Eagle- or
               non-Eagle-installed fan. These are service calls, NOT new-installation quotes.
@@ -213,13 +214,13 @@ jobs:
               Include the fan model result in the Bryan summary line for this lead so Kevin
               knows what fan is installed. If no Dropbox file is found, note "no prior file found."
             - INTERIOR QUOTE: Treat like a CLEAN AUTO-QUOTE but with interior/attic fan system.
-              Generate proposal with --interior flag (fan in attic, pipe through roof, no suction-point count).
+              Generate proposal with --interior flag (zero holes drilled, fan/pipe location TBD).
               For the warranty and system sheet PDFs:
-                1. Try: cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
-                   (if file missing, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
-                2. Interior system diagram: search Dropbox "/_A-Z forms/" for file whose name contains
-                   "interior" and "system" or "diagram" (case-insensitive). Download to /tmp/external_template.pdf.
-                   If not found, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+                1. cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+                2. Interior system diagram from Dropbox (exact path: "/_A-Z forms/Internal Radon System Sheet.pdf",
+                   file_id: id:HIR4vMWqTuwAAAAAAAEAiA). Use mcp__Dropbox__download_link to get the URL,
+                   then download to /tmp/external_template.pdf.
+                   If Dropbox download fails, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
                   --pipe PIPE_SIZE --price PRICE --date TODAY_DATE \
@@ -242,11 +243,11 @@ jobs:
               Price: $1,150 standard. Fan: RP145. Pipe: 3" (existing pipe already there).
               Generate proposal + warranty + interior system sheet (all 3 PDFs):
                 Derive the same address+town slug as auto-quotes.
-                Warranty template: try cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
-                  (if missing, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
-                Interior sheet: search Dropbox "/_A-Z forms/" for file whose name contains "interior"
-                  and "system" or "diagram" (case-insensitive). Download to /tmp/external_template.pdf.
-                  If not found, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+                Warranty template: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+                Interior sheet from Dropbox (exact path: "/_A-Z forms/Internal Radon System Sheet.pdf",
+                  file_id: id:HIR4vMWqTuwAAAAAAAEAiA). Use mcp__Dropbox__download_link then download
+                  to /tmp/external_template.pdf.
+                  If Dropbox download fails, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
                   --pipe 3 --price 1150 --date TODAY_DATE \
