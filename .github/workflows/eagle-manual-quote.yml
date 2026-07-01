@@ -42,6 +42,14 @@ on:
         description: 'Override price (e.g. 1750) — leave blank to use standard pricing'
         required: false
         default: ''
+      suction_points:
+        description: 'Number of suction points (1 or 2) — leave blank to use standard (1)'
+        required: false
+        default: ''
+      pipe_run:
+        description: 'Pipe run description (e.g. "through the garage") — leave blank for standard'
+        required: false
+        default: ''
       notes:
         description: 'Any extra notes for the email body'
         required: false
@@ -84,6 +92,8 @@ jobs:
             STEP 1 — DETERMINE FAN AND PRICE:
             - Fan model: RP145 if built 2000 or newer; GX5A if older
             - Pipe size: 3" standard; 4" if living area > 3,500 sq ft
+            - Suction points: ${{ inputs.suction_points || '1' }} (use as --points arg)
+            - Pipe run: ${{ inputs.pipe_run || '' }} (if non-empty, use as --run arg; otherwise omit --run and let make_proposal.py use its default "to the exterior")
             - If price override is set (not "none"), use that exact number as the price. Do NOT apply any standard pricing or distance adder.
             - Otherwise: Base price: $1,650; $2,250 if living area > 3,500 sq ft; add $100 if address is in: North Shore, far Greater Boston edges, South Coast, Cape Cod, or southeastern MA
 
@@ -112,9 +122,11 @@ jobs:
                 --fan FAN_MODEL \
                 --price PRICE \
                 --date TODAY_DATE \
+                --points SUCTION_POINTS \
                 --template /tmp/blank_sig.pdf \
                 --out /tmp/{SLUG}_Proposal.pdf \
-                [--central if garage flag is yes]
+                [--central if garage flag is yes] \
+                [--run "PIPE_RUN" only if pipe_run input is non-empty]
 
             Only generate warranty and external sheet if warranty_type is NOT "none":
               python eagle-tools/make_warranty.py \
