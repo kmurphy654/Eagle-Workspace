@@ -110,6 +110,13 @@ jobs:
 
             STEP 3 — CLASSIFY each remaining thread into one of:
             - CLEAN AUTO-QUOTE: built ~2000+→RP145 or older→GX5A; single open basement; poured concrete or block (NOT stone/fieldstone/brick); NO crawlspace; NO additions; NO split/raised slab; radon ≤ ~30 pCi/L; NOT Plymouth/Cape Cod geographic area. Pipe: 3" standard, 4" if living area >3,500 sq ft. Price: $1,650 base; $2,250 if living area >3,500 sq ft; add $100 distance adder for North Shore, far Greater Boston edges, South Coast, Cape Cod, southeastern MA. Use --central flag if garage has living space above.
+            - INTERIOR QUOTE: customer specifically requests or describes an interior/attic system
+              (fan in attic, pipe through roof, no exterior pipe exit). These ARE quotable jobs.
+              Price: same as CLEAN AUTO-QUOTE pricing. Fan: RP145 (2000+) or GX5A (pre-2000).
+              Pipe: 3" standard. Generate proposal with --interior flag. Warranty: Interior Warranty.
+              If Interior Warranty template does not exist, use 4 Warranty. Also attach the interior
+              system diagram sheet from Dropbox (search "/_A-Z forms/" for file containing "interior"
+              and "system" or "diagram"); if not found use External Radon System Sheet.
             - FAN SERVICE / REPAIR: existing fan that is noisy, broken, not working, running
               constantly, or needs replacement. Also: any request for service on an Eagle- or
               non-Eagle-installed fan. These are service calls, NOT new-installation quotes.
@@ -205,6 +212,31 @@ jobs:
               "
               Include the fan model result in the Bryan summary line for this lead so Kevin
               knows what fan is installed. If no Dropbox file is found, note "no prior file found."
+            - INTERIOR QUOTE: Treat like a CLEAN AUTO-QUOTE but with interior/attic fan system.
+              Generate proposal with --interior flag (fan in attic, pipe through roof, no suction-point count).
+              For the warranty and system sheet PDFs:
+                1. Try: cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
+                   (if file missing, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
+                2. Interior system diagram: search Dropbox "/_A-Z forms/" for file whose name contains
+                   "interior" and "system" or "diagram" (case-insensitive). Download to /tmp/external_template.pdf.
+                   If not found, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+                python eagle-tools/make_proposal.py \
+                  --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
+                  --pipe PIPE_SIZE --price PRICE --date TODAY_DATE \
+                  --template /tmp/blank_sig.pdf \
+                  --out /tmp/{SLUG}_Proposal.pdf \
+                  --interior
+                python eagle-tools/make_warranty.py \
+                  --addr "STREET ADDRESS, TOWN, MA" \
+                  --template-warranty /tmp/warranty_template.pdf \
+                  --template-external /tmp/external_template.pdf \
+                  --out-warranty /tmp/{SLUG}_Warranty.pdf \
+                  --out-external /tmp/{SLUG}_ExternalSheet.pdf
+              Draft email subject: Radon Mitigation Proposal — STREET ADDRESS, TOWN
+              Body: same as CLEAN AUTO-QUOTE but mention "interior system with fan installed in
+              the attic and pipe routed through the roof." instead of exterior pipe description.
+              Apply Label_25. Record in pending-quotes.json with warranty_type: "interior", interior: true.
+
             - ADD-A-FAN QUOTE: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
               Price: $1,150 standard. Fan: RP145. Pipe: 3" (existing pipe already there).
               Generate the proposal PDF only (NO warranty or external sheet — fan addition has no warranty):
@@ -278,6 +310,7 @@ jobs:
 
                 Tags:
                   [AUTO-QUOTE]   — standard quote, draft ready
+                  [INTERIOR]     — interior/attic fan system, draft ready
                   [FAN REQUEST]  — add-a-fan quote, draft ready
                   [BRYAN]        — site visit needed; include reason
                   [FAN SERVICE]  — repair/service call; include fan model if known

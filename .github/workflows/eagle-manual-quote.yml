@@ -50,6 +50,10 @@ on:
         description: 'Pipe run description (e.g. "through the garage") — leave blank for standard'
         required: false
         default: ''
+      interior:
+        description: 'Interior system? (yes/no) — fan in attic, pipe through roof; omits suction-point description'
+        required: false
+        default: 'no'
       notes:
         description: 'Any extra notes for the email body'
         required: false
@@ -74,7 +78,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           model: claude-sonnet-4-6
           mode: agent
-          allowed_tools: "mcp__Gmail__create_draft,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
+          allowed_tools: "mcp__Gmail__create_draft,mcp__Dropbox__search,mcp__Dropbox__download_link,mcp__Dropbox__list_folder,PushNotification,Bash,Read,Write,Edit,Glob,Grep"
           direct_prompt: |
             Create a manual Eagle Environmental radon mitigation quote draft for the following customer.
 
@@ -86,25 +90,40 @@ jobs:
             - Living area sq ft: ${{ inputs.sqft || 'unknown' }}
             - Radon level: ${{ inputs.radon_level || 'unknown' }} pCi/L
             - Garage with living space above: ${{ inputs.central_flag }}
+            - Interior system: ${{ inputs.interior }}
             - Price override: ${{ inputs.price_override || 'none' }}
             - Notes: ${{ inputs.notes || 'none' }}
+
+            INTERIOR SYSTEM NOTE: If interior is "yes", this is an attic-fan system (fan in attic,
+            pipe through roof). Skip suction-point count entirely. The warranty to use is the
+            "Cherry Palida" warranty: cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
+            (override whatever warranty_type says — interior always uses Interior Warranty).
 
             STEP 1 — DETERMINE FAN AND PRICE:
             - Fan model: RP145 if built 2000 or newer; GX5A if older
             - Pipe size: 3" standard; 4" if living area > 3,500 sq ft
-            - Suction points: ${{ inputs.suction_points || '1' }} (use as --points arg)
-            - Pipe run: ${{ inputs.pipe_run || '' }} (if non-empty, use as --run arg; otherwise omit --run and let make_proposal.py use its default "to the exterior")
+            - Suction points: ${{ inputs.suction_points || '1' }} (use as --points arg; ignored for interior systems)
+            - Pipe run: ${{ inputs.pipe_run || '' }} (if non-empty, use as --run arg; otherwise omit --run and let make_proposal.py use its default "to the exterior"; ignored for interior systems)
             - If price override is set (not "none"), use that exact number as the price. Do NOT apply any standard pricing or distance adder.
             - Otherwise: Base price: $1,650; $2,250 if living area > 3,500 sq ft; add $100 if address is in: North Shore, far Greater Boston edges, South Coast, Cape Cod, or southeastern MA
 
             STEP 2 — COPY TEMPLATES:
             Run these Bash commands:
               cp "eagle-tools/templates/Blank with signature.pdf" /tmp/blank_sig.pdf
+            If interior is "yes":
+              - Copy the interior system sheet from Dropbox: search Dropbox under "/_A-Z forms/" for a file
+                whose name contains "interior" and "system" or "diagram" (case-insensitive). Download it
+                using mcp__Dropbox__download_link and save to /tmp/external_template.pdf.
+                If no interior sheet is found in Dropbox, fall back to:
+                cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
+              - cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
+                (if this file does not exist, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
+            Else:
               cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
-            Warranty type: ${{ inputs.warranty_type }}
-            - If "4year": cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
-            - If "2year": cp "eagle-tools/templates/2.7 WARRANTY.pdf" /tmp/warranty_template.pdf
-            - If "none": skip warranty copy, no warranty PDF will be generated
+              Warranty type: ${{ inputs.warranty_type }}
+              - If "4year": cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf
+              - If "2year": cp "eagle-tools/templates/2.7 WARRANTY.pdf" /tmp/warranty_template.pdf
+              - If "none": skip warranty copy, no warranty PDF will be generated
 
             STEP 3 — GENERATE PDFs:
             Name the output files using the street address and town so they are identifiable in Gmail.
@@ -125,10 +144,12 @@ jobs:
                 --points SUCTION_POINTS \
                 --template /tmp/blank_sig.pdf \
                 --out /tmp/{SLUG}_Proposal.pdf \
-                [--central if garage flag is yes] \
-                [--run "PIPE_RUN" only if pipe_run input is non-empty]
+                [--central if garage flag is yes AND interior is NOT yes] \
+                [--run "PIPE_RUN" only if pipe_run input is non-empty AND interior is NOT yes] \
+                [--interior if interior is "yes"]
 
-            Only generate warranty and external sheet if warranty_type is NOT "none":
+            Only generate warranty and external sheet if warranty template was copied (interior always
+            generates warranty; non-interior only if warranty_type is NOT "none"):
               python eagle-tools/make_warranty.py \
                 --addr "STREET_ADDRESS, TOWN_TITLECASE, STATE" \
                 --template-warranty /tmp/warranty_template.pdf \
@@ -164,7 +185,7 @@ jobs:
 
             Attachments (use the {SLUG}-based filenames):
             - Always attach {SLUG}_Proposal.pdf
-            - If warranty_type is NOT "none": also attach {SLUG}_Warranty.pdf and {SLUG}_ExternalSheet.pdf
+            - If interior is "yes" OR warranty_type is NOT "none": also attach {SLUG}_Warranty.pdf and {SLUG}_ExternalSheet.pdf
 
             STEP 5 — RECORD IN PENDING QUOTES:
             Read pending-quotes.json from the repo (it may already exist with entries from the
@@ -181,7 +202,8 @@ jobs:
                 "price": PRICE_AS_NUMBER,
                 "date_quoted": "TODAY_DATE",
                 "draft_sent": false,
-                "warranty_type": "WARRANTY_TYPE (4year/2year/none)",
+                "warranty_type": "WARRANTY_TYPE (4year/2year/none/interior)",
+                "interior": true or false,
                 "source": "manual"
               }
             Write the updated array back to pending-quotes.json.
@@ -192,7 +214,8 @@ jobs:
 
             ABSOLUTE RULES:
             - NEVER send any email. Only create a draft.
-            - All three PDFs MUST be attached.
+            - Interior systems always get Warranty + ExternalSheet PDFs attached (3 total).
+            - Non-interior systems: attach Warranty + ExternalSheet only if warranty_type is NOT "none".
         env:
           GMAIL_MCP_CREDENTIALS: ${{ secrets.GMAIL_MCP_CREDENTIALS }}
           EAGLE_GMAIL_APP_PASSWORD: ${{ secrets.EAGLE_GMAIL_APP_PASSWORD }}

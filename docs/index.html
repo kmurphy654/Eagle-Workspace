@@ -224,6 +224,13 @@
           <option value="yes">Yes</option>
         </select>
       </div>
+      <div class="field">
+        <label>Interior System? (fan in attic, pipe through roof)</label>
+        <select id="interior">
+          <option value="no">No — standard exterior</option>
+          <option value="yes">Yes — interior / attic fan</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -319,7 +326,7 @@
       const result = {
         customer_name: '', customer_email: '', street_address: '',
         town: '', state: 'MA', year_built: '', sqft: '', radon_level: '', central_flag: 'no',
-        suction_points: '', pipe_run: '', notes: ''
+        interior: 'no', suction_points: '', pipe_run: '', notes: ''
       };
 
       // Email
@@ -340,6 +347,9 @@
 
       // Garage/central
       if (/garage|central|living above/i.test(text)) result.central_flag = 'yes';
+
+      // Interior system
+      if (/interior|attic\s+fan|through\s+the\s+roof|roof\s+penetration/i.test(text)) result.interior = 'yes';
 
       // Suction points — "3 points", "4 suction points", "five holes", "3-point", etc.
       const _nums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
@@ -428,6 +438,7 @@
         <strong>Sq Ft:</strong> ${_parsedData.sqft || 'not specified'}<br>
         <strong>Radon:</strong> ${_parsedData.radon_level || 'not specified'} pCi/L<br>
         <strong>Garage above:</strong> ${_parsedData.central_flag}<br>
+        <strong>Interior system:</strong> ${_parsedData.interior || 'no'}<br>
         <strong>Suction Points:</strong> ${_parsedData.suction_points || 'standard (1)'}<br>
         <strong>Pipe Run:</strong> ${_parsedData.pipe_run || 'standard'}<br><br>
         <label style="display:block;font-size:11px;color:#aaa;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">Warranty</label>
@@ -449,7 +460,7 @@
       const previewState = document.getElementById('preview_state');
       if (previewState) _parsedData.state = previewState.value;
       // Merge any manual edits
-      ['customer_name','customer_email','street_address','town','state','year_built','sqft','radon_level','central_flag','price_override','suction_points','pipe_run','notes'].forEach(k => {
+      ['customer_name','customer_email','street_address','town','state','year_built','sqft','radon_level','central_flag','interior','price_override','suction_points','pipe_run','notes'].forEach(k => {
         const el = document.getElementById(k);
         if (el && el.value.trim()) _parsedData[k] = el.value.trim();
       });
@@ -469,6 +480,7 @@
         radon_level: document.getElementById('radon_level').value.trim(),
         state: document.getElementById('state').value,
         central_flag: document.getElementById('central_flag').value,
+        interior: document.getElementById('interior').value,
         warranty_type: document.getElementById('warranty_type').value,
         price_override: document.getElementById('price_override').value.trim(),
         suction_points: document.getElementById('suction_points').value,
@@ -515,6 +527,7 @@
             if (el) el.value = '';
           });
           document.getElementById('central_flag').value = 'no';
+          document.getElementById('interior').value = 'no';
           document.getElementById('state').value = 'MA';
           document.getElementById('suction_points').value = '';
           document.getElementById('quick_text').value = '';
