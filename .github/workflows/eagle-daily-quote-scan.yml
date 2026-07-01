@@ -164,7 +164,8 @@ jobs:
               We will install a sub-slab depressurization system using a RadonAway fan with
               PIPE_SIZE" PVC pipe. Proposal price: $PRICE. This includes all labor, materials,
               and our standard warranty. Please reply or call (508) 393-7633 to schedule.
-              Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
+              Kevin Murphy / Eagle Environmental / (508) 393-7633 / eagle82nd@gmail.com
+              NOTE: Do NOT include the fan model name (RP145, GX5A, etc.) anywhere in the email body.
               Attach all three PDFs using the attachments field (use the {SLUG}-based filenames):
                 - {SLUG}_Proposal.pdf (mimeType: application/pdf)
                 - {SLUG}_Warranty.pdf (mimeType: application/pdf)
@@ -225,9 +226,9 @@ jobs:
             Also include an "OPEN QUOTES BY AREA" section: read pending-quotes.json (if it
             exists) and list ALL entries where draft_sent is false — including both
             auto-quotes and add-a-fan entries. Group by town using these regions:
-              - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville
-              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Wellesley, Weston, Wayland, Sudbury, Concord, Acton, Maynard, Natick
-              - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield
+              - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville, Westminster, Townsend, Lunenburg, Ayer, Groton, Pepperell, Shirley, Lancaster, Sterling, Princeton, Holden, Paxton, Rutland, Barre, Hardwick, New Braintree, Hubbardston
+              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Wellesley, Weston, Wayland, Sudbury, Concord, Acton, Maynard, Natick, Melrose, Malden, North Chelmsford, Chestnut Hill, Jamaica Plain
+              - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield, Bradford, North Andover, Middleton, Hamilton, Wenham
               - South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
               - Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
               - Any town not matching above: group under "Other"
@@ -251,15 +252,20 @@ jobs:
                 Format: Name — Address — reason it's urgent
                 If none, omit this section entirely.
 
-              SECTION 2 — OPEN QUOTES BY AREA:
-                Combine two sources into one regional list:
-                  a) All pending-quotes.json entries where draft_sent is false — tag [AUTO-QUOTE] or [FAN REQUEST]
-                  b) Every lead classified as BRYAN or FAN SERVICE / REPAIR in today's scan — tag [BRYAN]
-                Same regional groupings as STEP 5. Each line:
-                  Name — Address, Town — $Price (or "site visit") — [AUTO-QUOTE] / [FAN REQUEST] / [BRYAN]
-                For BRYAN lines, add a brief reason after the tag: e.g. [BRYAN] stone foundation,
-                [BRYAN] fan service — RP145 on file, [BRYAN] Toll Brothers, [BRYAN] crawlspace
-                If no entries at all, write "No open quotes."
+              SECTION 2 — OPEN QUOTES BY AREA (pending auto-quotes first, then Bryan by region):
+
+                Part A — pending-quotes.json entries where draft_sent is false, grouped by region.
+                Each line: Name — Address, Town — $Price — [AUTO-QUOTE] or [FAN REQUEST]
+                For add-a-fan entries append "add-a-fan" after the tag.
+
+                Part B — "BRYAN leads for your review (N total + M fan service):"
+                Group Bryan/fan-service leads from today's scan under the same regional headings.
+                Each line: Name — Address, Town — site visit — [BRYAN] brief reason
+                Fan service lines include the fan model if found in Dropbox: [BRYAN] fan service, Eagle-installed, RP145 on file
+                Regions: MetroWest / Central MA | Greater Boston / Inner Suburbs |
+                         North Shore | South Shore / Cape & Islands |
+                         Metrowest South / 495 South | Other
+                Any Bryan lead whose town doesn't match a region goes under "Other."
 
               Do NOT include Needs Info lists, aged-out lists, skip counts, or iMessage notes
               in the email. Those belong in the .md summary file only.
