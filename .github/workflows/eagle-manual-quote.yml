@@ -98,6 +98,8 @@ jobs:
 
             STEP 3 — GENERATE PDFs:
             Name the output files using the street address and town so they are identifiable in Gmail.
+            IMPORTANT: Convert the town to Title Case before using it anywhere (slug, --town arg,
+            email subject, PDF filename). E.g. "leominster" → "Leominster", "south hadley" → "South Hadley".
             Derive a slug: CamelCase street name + house number + Town (TitleCase, no spaces).
             Examples: "60 Whipple Hill, Grafton" → WhippleHill60Grafton, "26 Long Hill Dr, Leominster" → LongHillDr26Leominster
 
@@ -105,7 +107,7 @@ jobs:
               python eagle-tools/make_proposal.py \
                 --name "CUSTOMER_NAME" \
                 --addr "STREET_ADDRESS" \
-                --town "TOWN, MA" \
+                --town "TOWN_TITLECASE, STATE" \
                 --pipe PIPE_SIZE \
                 --fan FAN_MODEL \
                 --price PRICE \
@@ -116,7 +118,7 @@ jobs:
 
             Only generate warranty and external sheet if warranty_type is NOT "none":
               python eagle-tools/make_warranty.py \
-                --addr "STREET_ADDRESS, TOWN, MA" \
+                --addr "STREET_ADDRESS, TOWN_TITLECASE, STATE" \
                 --template-warranty /tmp/warranty_template.pdf \
                 --template-external /tmp/external_template.pdf \
                 --out-warranty /tmp/{SLUG}_Warranty.pdf \
@@ -126,11 +128,11 @@ jobs:
             Read each PDF with: base64 -w0 /tmp/{SLUG}_Proposal.pdf (etc.)
             Create a Gmail draft with:
               To: CUSTOMER_EMAIL
-              Subject: Radon Mitigation Proposal — STREET_ADDRESS, TOWN
+              Subject: Radon Mitigation Proposal — STREET_ADDRESS, TOWN_TITLECASE
               Body:
                 Hi FIRST_NAME,
 
-                Thank you for reaching out to Eagle Environmental. Please find attached our proposal for radon mitigation at STREET_ADDRESS, TOWN, MA.
+                Thank you for reaching out to Eagle Environmental. Please find attached our proposal for radon mitigation at STREET_ADDRESS, TOWN_TITLECASE, STATE.
 
                 We will install a sub-slab depressurization system using a RadonAway fan with PIPE_SIZE" PVC pipe. This system will draw radon from beneath your foundation and vent it safely above the roofline.
 

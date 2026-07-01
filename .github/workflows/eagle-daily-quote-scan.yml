@@ -185,7 +185,7 @@ jobs:
               import pypdf, sys
               r = pypdf.PdfReader('/tmp/prior_proposal.pdf')
               text = ' '.join(p.extract_text() or '' for p in r.pages)
-              for fan in ['RP145','GX5A','HP220','HP225','RP145','RP145-2','SGX5','EZR']:
+              for fan in ['RP145-2','RP145','GX5A','HP220','HP225','SGX5','EZR']:
                   if fan in text:
                       print('FAN:', fan)
                       break
@@ -257,8 +257,15 @@ jobs:
                   Name — Address, Town — $Price — [AUTO-QUOTE] or [FAN REQUEST]
                 If none, write "No open quotes."
 
-              Do NOT include Bryan lists, Needs Info lists, aged-out lists, skip counts,
-              or iMessage notes in the email. Those belong in the .md summary file only.
+              SECTION 3 — NEEDS SITE VISIT (BRYAN):
+                List every lead classified as BRYAN or FAN SERVICE / REPAIR in today's scan.
+                Each line: Name — Address, Town — reason (e.g. stone foundation, fan service,
+                crawlspace, Toll Brothers, etc.). If a fan model was found in Dropbox for a
+                FAN SERVICE lead, include it: e.g. "fan service — RP145 on file"
+                If none today, omit this section.
+
+              Do NOT include Needs Info lists, aged-out lists, skip counts, or iMessage notes
+              in the email. Those belong in the .md summary file only.
             Send using curl with Gmail SMTP:
               curl --ssl-reqd \
                 --url "smtps://smtp.gmail.com:465" \
