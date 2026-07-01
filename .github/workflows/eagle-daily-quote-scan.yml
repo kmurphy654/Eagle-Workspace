@@ -252,17 +252,14 @@ jobs:
                 If none, omit this section entirely.
 
               SECTION 2 — OPEN QUOTES BY AREA:
-                All pending-quotes.json entries where draft_sent is false.
+                Combine two sources into one regional list:
+                  a) All pending-quotes.json entries where draft_sent is false — tag [AUTO-QUOTE] or [FAN REQUEST]
+                  b) Every lead classified as BRYAN or FAN SERVICE / REPAIR in today's scan — tag [BRYAN]
                 Same regional groupings as STEP 5. Each line:
-                  Name — Address, Town — $Price — [AUTO-QUOTE] or [FAN REQUEST]
-                If none, write "No open quotes."
-
-              SECTION 3 — NEEDS SITE VISIT (BRYAN):
-                List every lead classified as BRYAN or FAN SERVICE / REPAIR in today's scan.
-                Each line: Name — Address, Town — reason (e.g. stone foundation, fan service,
-                crawlspace, Toll Brothers, etc.). If a fan model was found in Dropbox for a
-                FAN SERVICE lead, include it: e.g. "fan service — RP145 on file"
-                If none today, omit this section.
+                  Name — Address, Town — $Price (or "site visit") — [AUTO-QUOTE] / [FAN REQUEST] / [BRYAN]
+                For BRYAN lines, add a brief reason after the tag: e.g. [BRYAN] stone foundation,
+                [BRYAN] fan service — RP145 on file, [BRYAN] Toll Brothers, [BRYAN] crawlspace
+                If no entries at all, write "No open quotes."
 
               Do NOT include Needs Info lists, aged-out lists, skip counts, or iMessage notes
               in the email. Those belong in the .md summary file only.
