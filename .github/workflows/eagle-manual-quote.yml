@@ -43,7 +43,7 @@ on:
         required: false
         default: ''
       suction_points:
-        description: 'Number of suction points (1 or 2) — leave blank to use standard (1)'
+        description: 'Number of suction points (e.g. 1, 2, 4, 5) — leave blank to use standard (1)'
         required: false
         default: ''
       pipe_run:
