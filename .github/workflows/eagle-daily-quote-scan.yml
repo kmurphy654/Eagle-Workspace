@@ -227,7 +227,7 @@ jobs:
             exists) and list ALL entries where draft_sent is false — including both
             auto-quotes and add-a-fan entries. Group by town using these regions:
               - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville, Westminster, Townsend, Lunenburg, Ayer, Groton, Pepperell, Shirley, Lancaster, Sterling, Princeton, Holden, Paxton, Rutland, Barre, Hardwick, New Braintree, Hubbardston
-              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Wellesley, Weston, Wayland, Sudbury, Concord, Acton, Maynard, Natick, Melrose, Malden, North Chelmsford, Chestnut Hill, Jamaica Plain
+              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Wellesley, Weston, Wayland, Sudbury, Concord, Acton, Maynard, Natick, Melrose, Chestnut Hill, Jamaica Plain
               - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield, Bradford, North Andover, Middleton, Hamilton, Wenham
               - South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
               - Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
@@ -257,7 +257,16 @@ jobs:
                   - pending-quotes.json entries where draft_sent is false
                   - Every lead classified as BRYAN, FAN SERVICE / REPAIR, or NEEDS INFO today
 
-                Group by region (same regions as STEP 5). Within each region, list every lead on one line:
+                Use EXACTLY these region definitions to place every lead (match the lead's town
+                against each list; if not found, use "Other"):
+                  MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville, Westminster, Townsend, Lunenburg, Ayer, Groton, Pepperell, Shirley, Lancaster, Sterling, Princeton, Holden, Paxton, Rutland, Barre, Hardwick, New Braintree, Hubbardston, North Chelmsford
+                  Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Wellesley, Weston, Wayland, Sudbury, Concord, Acton, Maynard, Natick, Melrose, Chestnut Hill, Jamaica Plain
+                  North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield, Bradford, North Andover, Middleton, Hamilton, Wenham
+                  South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
+                  Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
+                  Other: anything not matching above
+
+                Within each region, list every lead on one line:
                   Name — Address, Town — $Price or "site visit" — [TAG] brief note
 
                 Tags:
@@ -267,6 +276,8 @@ jobs:
                   [FAN SERVICE]  — service/repair call; add fan model if found in Dropbox
                   [NEEDS INFO]   — missing address or unclear scope
 
+                IMPORTANT: Every BRYAN, FAN SERVICE, and NEEDS INFO lead from today's scan
+                MUST appear in this list under the correct region. Do not omit any.
                 If no entries at all, write "No open leads."
 
               Do NOT include aged-out lists, skip counts, or iMessage notes in the email.
