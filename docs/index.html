@@ -318,7 +318,8 @@
     function parseQuickText(text) {
       const result = {
         customer_name: '', customer_email: '', street_address: '',
-        town: '', state: 'MA', year_built: '', sqft: '', radon_level: '', central_flag: 'no', notes: ''
+        town: '', state: 'MA', year_built: '', sqft: '', radon_level: '', central_flag: 'no',
+        suction_points: '', pipe_run: '', notes: ''
       };
 
       // Email
@@ -339,6 +340,20 @@
 
       // Garage/central
       if (/garage|central|living above/i.test(text)) result.central_flag = 'yes';
+
+      // Suction points — "3 points", "4 suction points", "five holes", "3-point", etc.
+      const _nums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+      const ptMatch = text.match(/\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s*[-–]?\s*(?:suction\s*)?(?:points?|holes?|taps?)\b/i)
+                   || text.match(/\b(\d+)\s*[-–]\s*point\b/i);
+      if (ptMatch) {
+        const v = ptMatch[1].toLowerCase();
+        result.suction_points = String(_nums[v] || parseInt(v) || '');
+      }
+
+      // Pipe run — "through the garage", "out the back", "to the exterior", "up through attic", etc.
+      const pipeMatch = text.match(/\bpipe\s+(?:runs?\s+)?(.{5,50}?)(?:[.,;]|$)/i)
+                     || text.match(/\b(through\s+the\s+\w+(?:\s+\w+)?|out\s+the\s+\w+(?:\s+\w+)?|up\s+through\s+\w+(?:\s+\w+)?)\b/i);
+      if (pipeMatch) result.pipe_run = pipeMatch[1].trim();
 
       // Street address — fully case-insensitive, title-case the result
       const addrMatch = text.match(/\b(\d+\s+[a-z]+(?:\s+[a-z]+){0,4}(?:\s+(?:st|street|dr|drive|rd|road|ave|avenue|ln|lane|way|blvd|ct|court|pl|place|hill|brook|lake|park|view|ridge|glen|wood|mills|point|run|trail|circle|cir|ter|terrace|heights|pkwy|parkway)\.?))\b/i);
@@ -412,7 +427,9 @@
         <strong>Year Built:</strong> ${_parsedData.year_built || '<span style="color:#e74c3c">⚠ missing</span>'}<br>
         <strong>Sq Ft:</strong> ${_parsedData.sqft || 'not specified'}<br>
         <strong>Radon:</strong> ${_parsedData.radon_level || 'not specified'} pCi/L<br>
-        <strong>Garage above:</strong> ${_parsedData.central_flag}<br><br>
+        <strong>Garage above:</strong> ${_parsedData.central_flag}<br>
+        <strong>Suction Points:</strong> ${_parsedData.suction_points || 'standard (1)'}<br>
+        <strong>Pipe Run:</strong> ${_parsedData.pipe_run || 'standard'}<br><br>
         <label style="display:block;font-size:11px;color:#aaa;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">Warranty</label>
         <select id="quick_warranty" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #0f3460;background:#0f3460;color:#fff;font-size:15px;margin-bottom:12px">
           <option value="4year" ${warrantyVal==='4year'?'selected':''}>4-Year Warranty</option>
