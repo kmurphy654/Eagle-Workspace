@@ -124,8 +124,9 @@ jobs:
 
             CRITICAL — AS YOU CLASSIFY: For every lead classified as BRYAN, FAN SERVICE, or
             NEEDS INFO, immediately append one line to /tmp/bryan_leads.txt in this format:
-              NAME|ADDRESS|TOWN|REASON
-            Example: Shannon Boeckelman|4 Mostika Rd|Woburn|stone foundation, radon 34 pCi/L
+              NAME|ADDRESS|TOWN|REASON|INQUIRY_DATE
+            INQUIRY_DATE = the date the webadmin@radonremover.com email arrived (from email headers).
+            Example: Shannon Boeckelman|4 Mostika Rd|Woburn|stone foundation, radon 34 pCi/L|2026-06-28
             Do this during classification, not later. This file is the source of truth for
             the email. If /tmp/bryan_leads.txt does not exist when you reach STEP 6, you
             missed leads — go back and create it now before sending the email.
@@ -180,7 +181,8 @@ jobs:
                 - {SLUG}_ExternalSheet.pdf (mimeType: application/pdf)
               Apply Label_25 ("Auto-quote ready (review)") to the thread.
               Record each quote in pending-quotes.json (create or append) with fields:
-                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, draft_sent: false, warranty_type: "4year"
+                last_name, first_name, email, street_addr, town, fan, pipe, price, date_quoted, inquiry_date, draft_sent: false, warranty_type: "4year"
+              inquiry_date = the date the webadmin email arrived (from email headers)
 
             - FAN SERVICE / REPAIR: List under BRYAN in the summary (Kevin handles personally).
               No draft, no PDF, no label change.
@@ -231,19 +233,14 @@ jobs:
 
             STEP 5 — SUMMARY: Write a SUMMARY-YYYY-MM-DD.md file to the Eagle-Workspace repo (use today's actual date in the filename). Include all buckets, counts, actions taken, and any skipped leads. Every lead that was found in the inbox today MUST appear in one of these sections — even if it was seen on a prior day. Kevin wants the full picture of what is outstanding every time.
 
-            Also include an "OPEN QUOTES BY AREA" section: read pending-quotes.json (if it
-            exists) and list ALL entries where draft_sent is false — including both
-            auto-quotes and add-a-fan entries. Group by town using these regions:
-              - MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville, Westminster, Townsend, Lunenburg, Ayer, Groton, Pepperell, Shirley, Lancaster, Sterling, Princeton, Holden, Paxton, Rutland, Barre, Hardwick, New Braintree, Hubbardston, Concord, Wellesley, Weston, Wayland, Sudbury, Acton, Maynard
-              - Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Natick, Melrose, Chestnut Hill, Jamaica Plain
-              - North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield, Bradford, North Andover, Middleton, Hamilton, Wenham
-              - South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
-              - Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
-              - Any town not matching above: group under "Other"
-            For each entry show: customer name, address, town, price (or "add-a-fan"), date
-            quoted, and a tag — [AUTO-QUOTE] or [FAN REQUEST] — based on the type field
-            (or fan field = "add-a-fan"). If pending-quotes.json doesn't exist or has no
-            open entries, write "No open quotes."
+            Also include an "OPEN QUOTES BY DISTANCE" section.
+            Use Bash to run: python3 eagle-tools/ma_towns.py --ring "TOWN" for each entry
+            to get the distance ring. Group all entries (pending-quotes.json draft_sent=false
+            plus today's Bryan/FanService/NeedsInfo leads) by distance ring:
+              "0–20 miles" | "20–35 miles" | "35–50 miles" | "50+ miles" | "Unknown"
+            For each entry show: customer name, address, town, price or "site visit",
+            inquiry date (date the webadmin email arrived), and tag.
+            If pending-quotes.json doesn't exist or has no open entries, write "No open quotes."
 
             Commit and push pending-quotes.json and the summary file to branch claude/eagle-daily-quote-scan-8kp0b1.
 
@@ -260,34 +257,33 @@ jobs:
                 Format: Name — Address — reason it's urgent
                 If none, omit this section entirely.
 
-              SECTION 2 — OPEN QUOTES BY AREA:
-                One unified list. Combine ALL of the following into a single regional breakdown:
-                  - pending-quotes.json entries where draft_sent is false
-                  - Every lead classified as BRYAN, FAN SERVICE / REPAIR, or NEEDS INFO today
+              SECTION 2 — OPEN QUOTES BY DISTANCE FROM OFFICE:
+                One unified list grouped by distance ring from Boylston, MA office.
+                Use: python3 eagle-tools/ma_towns.py --ring "TOWN" to get each lead's ring.
 
-                Use EXACTLY these region definitions to place every lead (match the lead's town
-                against each list; if not found, use "Other"):
-                  MetroWest / Central MA: Framingham, Natick, Ashland, Hopkinton, Holliston, Milford, Northborough, Southborough, Westborough, Shrewsbury, Worcester, Leominster, Fitchburg, Gardner, Clinton, Hudson, Marlborough, Millis, Medfield, Medway, Bellingham, Franklin, Wrentham, Foxborough, Mansfield, Norton, Attleboro, North Attleboro, Plainville, Westminster, Townsend, Lunenburg, Ayer, Groton, Pepperell, Shirley, Lancaster, Sterling, Princeton, Holden, Paxton, Rutland, Barre, Hardwick, New Braintree, Hubbardston, North Chelmsford, Concord, Wellesley, Weston, Wayland, Sudbury, Acton, Maynard
-                  Greater Boston / Inner Suburbs: Boston, Cambridge, Somerville, Medford, Malden, Everett, Chelsea, Revere, Winthrop, Newton, Brookline, Watertown, Waltham, Belmont, Arlington, Lexington, Burlington, Woburn, Winchester, Stoneham, Wakefield, Reading, Wilmington, Billerica, Chelmsford, Lowell, Tewksbury, Andover, Lawrence, Haverhill, Methuen, Needham, Dedham, Westwood, Norwood, Natick, Melrose, Chestnut Hill, Jamaica Plain
-                  North Shore: Lynn, Salem, Beverly, Peabody, Danvers, Marblehead, Swampscott, Gloucester, Rockport, Ipswich, Newburyport, Amesbury, Salisbury, Newbury, Rowley, Topsfield, Boxford, Georgetown, Groveland, Merrimac, West Newbury, Byfield, Bradford, North Andover, Middleton, Hamilton, Wenham
-                  South Shore / Cape & Islands: Quincy, Braintree, Weymouth, Hingham, Cohasset, Scituate, Marshfield, Duxbury, Plymouth, Pembroke, Hanover, Norwell, Rockland, Abington, Brockton, Easton, Stoughton, Randolph, Milton, Canton, Holbrook, Avon, Whitman, Hanson, Halifax, Kingston, Middleborough, Lakeville, Wareham, Cape Cod, Falmouth, Barnstable, Hyannis, Yarmouth, Dennis, Harwich, Chatham, Orleans, Eastham, Wellfleet, Provincetown, Bourne, Sandwich, Mashpee, Brewster, Truro
-                  Metrowest South / 495 South: Hopedale, Upton, Mendon, Uxbridge, Douglas, Sutton, Grafton, Northbridge, Millbury, Auburn, Oxford, Charlton, Sturbridge, Webster, Dudley, Southbridge, Spencer
-                  Other: anything not matching above
+                Rings (innermost first):
+                  0–20 miles
+                  20–35 miles
+                  35–50 miles
+                  50+ miles
+                  Unknown (town not in lookup)
 
-                Within each region, list every lead on one line:
-                  Name — Address, Town — $Price or "site visit" — [TAG] brief note
+                Sources to combine:
+                  a) pending-quotes.json entries where draft_sent is false
+                  b) Every line from /tmp/bryan_leads.txt (written during STEP 3 classification)
+                     Format: NAME|ADDRESS|TOWN|REASON|INQUIRY_DATE
+
+                Each line in the email:
+                  Name — Address, Town — $Price or "site visit" — [TAG] note — requested: INQUIRY_DATE
 
                 Tags:
-                  [AUTO-QUOTE]   — standard radon system quote, draft ready
+                  [AUTO-QUOTE]   — standard quote, draft ready
                   [FAN REQUEST]  — add-a-fan quote, draft ready
-                  [BRYAN]        — needs site visit; add reason: stone foundation, crawlspace, additions, etc.
-                  [FAN SERVICE]  — service/repair call; add fan model if found in Dropbox
-                  [NEEDS INFO]   — missing address or unclear scope
+                  [BRYAN]        — site visit needed; include reason
+                  [FAN SERVICE]  — repair/service call; include fan model if known
+                  [NEEDS INFO]   — missing info
 
-                For Bryan/Fan Service/Needs Info leads, read /tmp/bryan_leads.txt (written
-                during STEP 3). Parse each line (NAME|ADDRESS|TOWN|REASON) and place under
-                the correct region by matching TOWN against the lists above.
-                EVERY line in /tmp/bryan_leads.txt must appear in the email. Do not omit any.
+                EVERY line in /tmp/bryan_leads.txt must appear. Do not omit any.
                 If no entries at all, write "No open leads."
 
               Do NOT include aged-out lists, skip counts, or iMessage notes in the email.
