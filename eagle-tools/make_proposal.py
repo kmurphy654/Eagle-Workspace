@@ -50,16 +50,21 @@ c.drawString(446, ry(266.5), args.fan)
 c.drawString(245, ry(280), "on the outside")
 c.drawString(135, ry(291), "above the roof edge")
 c.drawString(165, ry(416), "1")
-if args.points >= 2:
-    l1 = "Two (2) suction points; pipe runs from the holes, segmenting the basement slab, to the"
-    l2 = "exterior. Exact location to be determined the day of installation."
-else:
+_words = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten"]
+def _pt(n):
+    w = _words[n] if n < len(_words) else str(n)
+    return f"{w} ({n})"
+
+if args.points == 1:
     if args.central:
         l1 = "One (1) suction point located toward the center of the basement; pipe runs from the"
         l2 = "hole, segmenting the slab, out to the exterior fan. Exact location determined day of install."
     else:
         l1 = "One (1) suction point; pipe runs from the hole, segmenting the basement slab, to the"
         l2 = "exterior. Exact location to be determined the day of installation."
+else:
+    l1 = f"{_pt(args.points)} suction points; pipe runs from the holes, segmenting the basement slab, to the"
+    l2 = "exterior. Exact locations to be determined the day of installation."
 l3 = "System guaranteed below 4.0 pCi/L.  5-yr warranty on fan unit."
 c.drawString(95, ry(443), l1)
 c.drawString(95, ry(455), l2)
