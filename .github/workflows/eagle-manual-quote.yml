@@ -51,7 +51,7 @@ on:
         required: false
         default: ''
       interior:
-        description: 'Interior system? (yes/no) — fan in attic, pipe through roof; omits suction-point description'
+        description: 'Interior/fan cut-in? (yes/no) — use for: (1) fan in attic/pipe through roof, or (2) fan cut into existing passive pipe. Uses interior system sheet instead of external sheet.'
         required: false
         default: 'no'
       notes:

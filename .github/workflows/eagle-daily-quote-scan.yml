@@ -237,17 +237,29 @@ jobs:
               the attic and pipe routed through the roof." instead of exterior pipe description.
               Apply Label_25. Record in pending-quotes.json with warranty_type: "interior", interior: true.
 
-            - ADD-A-FAN QUOTE: Treat like a CLEAN AUTO-QUOTE but for a fan-addition job.
+            - ADD-A-FAN QUOTE: Fan cut-in to an existing passive pipe. Use the INTERIOR system
+              sheet (not the external sheet) because the fan ties into an existing interior pipe.
               Price: $1,150 standard. Fan: RP145. Pipe: 3" (existing pipe already there).
-              Generate the proposal PDF only (NO warranty or external sheet — fan addition has no warranty):
+              Generate proposal + warranty + interior system sheet (all 3 PDFs):
                 Derive the same address+town slug as auto-quotes.
+                Warranty template: try cp "eagle-tools/templates/Interior Warranty.pdf" /tmp/warranty_template.pdf
+                  (if missing, fall back to: cp "eagle-tools/templates/4 Warranty.pdf" /tmp/warranty_template.pdf)
+                Interior sheet: search Dropbox "/_A-Z forms/" for file whose name contains "interior"
+                  and "system" or "diagram" (case-insensitive). Download to /tmp/external_template.pdf.
+                  If not found, fall back to: cp "eagle-tools/templates/External Radon System Sheet.pdf" /tmp/external_template.pdf
                 python eagle-tools/make_proposal.py \
                   --name "FULL NAME" --addr "STREET ADDRESS" --town "TOWN, MA" \
-                  --pipe 3 --fan RP145 --price 1150 --date TODAY_DATE \
+                  --pipe 3 --price 1150 --date TODAY_DATE \
                   --template /tmp/blank_sig.pdf \
                   --out /tmp/{SLUG}_Proposal.pdf
-                Verify the file exists: ls -la /tmp/{SLUG}_Proposal.pdf
-                Read it: base64 -w0 /tmp/{SLUG}_Proposal.pdf
+                python eagle-tools/make_warranty.py \
+                  --addr "STREET ADDRESS, TOWN, MA" \
+                  --template-warranty /tmp/warranty_template.pdf \
+                  --template-external /tmp/external_template.pdf \
+                  --out-warranty /tmp/{SLUG}_Warranty.pdf \
+                  --out-external /tmp/{SLUG}_ExternalSheet.pdf
+                Verify all three files exist: ls -la /tmp/{SLUG}_Proposal.pdf /tmp/{SLUG}_Warranty.pdf /tmp/{SLUG}_ExternalSheet.pdf
+                Read all three with base64 -w0
               Create a Gmail draft TO the customer:
                 Subject: Radon Fan Addition Proposal — STREET ADDRESS, TOWN
                 Body: Hi FIRST_NAME, thank you for reaching out to Eagle Environmental.
@@ -255,11 +267,11 @@ jobs:
                 Price: $1,150. This includes the fan unit, installation, and all labor.
                 Please reply or call (508) 393-7633 to schedule.
                 Kevin Murphy / Eagle Environmental / eagle82nd@gmail.com
-                Attach: {SLUG}_Proposal.pdf
+                Attach all 3 PDFs: {SLUG}_Proposal.pdf, {SLUG}_Warranty.pdf, {SLUG}_ExternalSheet.pdf
               Apply Label_25 to the thread.
               Record in pending-quotes.json:
                 last_name, first_name, email, street_addr, town, fan: "RP145", pipe: "3",
-                price: 1150, date_quoted: TODAY, draft_sent: false, warranty_type: "none", type: "add-a-fan"
+                price: 1150, date_quoted: TODAY, draft_sent: false, warranty_type: "interior", type: "add-a-fan", interior: true
             - AGED OUT: Apply Label_26 ("Aged out (review)") to the thread.
             - All others: list only in summary, no draft.
 

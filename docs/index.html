@@ -225,10 +225,10 @@
         </select>
       </div>
       <div class="field">
-        <label>Interior System? (fan in attic, pipe through roof)</label>
+        <label>Interior / Fan Cut-In? (attic fan OR fan into existing pipe)</label>
         <select id="interior">
           <option value="no">No — standard exterior</option>
-          <option value="yes">Yes — interior / attic fan</option>
+          <option value="yes">Yes — interior system or fan cut-in</option>
         </select>
       </div>
     </div>
@@ -348,8 +348,8 @@
       // Garage/central
       if (/garage|central|living above/i.test(text)) result.central_flag = 'yes';
 
-      // Interior system
-      if (/interior|attic\s+fan|through\s+the\s+roof|roof\s+penetration/i.test(text)) result.interior = 'yes';
+      // Interior system or fan cut-in
+      if (/interior|attic\s+fan|through\s+the\s+roof|roof\s+penetration|fan\s+cut[\s-]?in|cut[\s-]?in\s+fan|existing\s+pipe/i.test(text)) result.interior = 'yes';
 
       // Suction points — "3 points", "4 suction points", "five holes", "3-point", etc.
       const _nums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
