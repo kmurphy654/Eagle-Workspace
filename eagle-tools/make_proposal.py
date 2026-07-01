@@ -58,10 +58,10 @@ def _pt(n):
 if args.points == 1:
     if args.central:
         l1 = "One (1) suction point located toward the center of the basement; pipe runs from the"
-        l2 = "hole, segmenting the slab, out to the exterior fan. Exact location determined day of install."
+        l2 = "hole out to the exterior fan. Exact location to be determined the day of installation."
     else:
-        l1 = "One (1) suction point; pipe runs from the hole, segmenting the basement slab, to the"
-        l2 = "exterior. Exact location to be determined the day of installation."
+        l1 = "One (1) suction point; pipe runs from the hole to the exterior."
+        l2 = "Exact location to be determined the day of installation."
 else:
     l1 = f"{_pt(args.points)} suction points; pipe runs from the holes, segmenting the basement slab, to the"
     l2 = "exterior. Exact locations to be determined the day of installation."
