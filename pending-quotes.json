@@ -23,8 +23,14 @@
     "pipe": "3",
     "price": 1650,
     "date_quoted": "2026-07-01",
-    "draft_sent": false,
-    "warranty_type": "4year"
+    "draft_sent": true,
+    "sent_date": "2026-07-08",
+    "warranty_type": "4year",
+    "dropbox_note": "Upload pending — DROPBOX_MCP_CREDENTIALS not configured",
+    "dropbox_paths": {
+      "proposal": "/Burlington Proposals/WinnSt137PBurlington.pdf",
+      "warranty": "/Burlington Proposals/WinnSt137DBurlington.pdf"
+    }
   },
   {
     "last_name": "Gagnon",
