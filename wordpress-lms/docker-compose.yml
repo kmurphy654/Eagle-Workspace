@@ -1,0 +1,58 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: adoption-lms-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "${DB_NAME:-wordpress}"
+      MYSQL_USER: "${DB_USER:-wordpress}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-wordpress}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootpass}"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:6-php8.3-apache
+    container_name: adoption-lms-wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${WP_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: "${DB_NAME:-wordpress}"
+      WORDPRESS_DB_USER: "${DB_USER:-wordpress}"
+      WORDPRESS_DB_PASSWORD: "${DB_PASSWORD:-wordpress}"
+    volumes:
+      - wp_data:/var/www/html
+
+  # Runs wp-cli commands against the same files/db. Used by setup.sh.
+  wpcli:
+    image: wordpress:cli-php8.3
+    container_name: adoption-lms-cli
+    depends_on:
+      db:
+        condition: service_healthy
+      wordpress:
+        condition: service_started
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: "${DB_NAME:-wordpress}"
+      WORDPRESS_DB_USER: "${DB_USER:-wordpress}"
+      WORDPRESS_DB_PASSWORD: "${DB_PASSWORD:-wordpress}"
+    volumes:
+      - wp_data:/var/www/html
+    # Only started on demand via "docker compose run wpcli ..." (see setup.sh),
+    # never by a plain "up". The image's default entrypoint handles `wp`.
+    profiles: ["tools"]
+
+volumes:
+  db_data:
+  wp_data:
