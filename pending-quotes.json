@@ -121,8 +121,14 @@
     "pipe": "3",
     "price": 1050,
     "date_quoted": "2026-07-01",
-    "draft_sent": false,
+    "draft_sent": true,
+    "sent_date": "2026-07-09",
     "warranty_type": "4year",
-    "source": "manual"
+    "source": "manual",
+    "dropbox_note": "Upload pending — DROPBOX_MCP_CREDENTIALS not configured",
+    "dropbox_paths": {
+      "proposal": "/Hopkinton Proposals/Waterville36PHopkinton.pdf",
+      "warranty": "/Hopkinton Proposals/Waterville36DHopkinton.pdf"
+    }
   }
 ]
