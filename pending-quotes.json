@@ -26,7 +26,7 @@
     "draft_sent": true,
     "sent_date": "2026-07-08",
     "warranty_type": "4year",
-    "dropbox_note": "Upload pending — DROPBOX_MCP_CREDENTIALS not configured",
+    "dropbox_note": "Upload pending \u2014 DROPBOX_MCP_CREDENTIALS not configured",
     "dropbox_paths": {
       "proposal": "/Burlington Proposals/WinnSt137PBurlington.pdf",
       "warranty": "/Burlington Proposals/WinnSt137DBurlington.pdf"
@@ -125,10 +125,53 @@
     "sent_date": "2026-07-09",
     "warranty_type": "4year",
     "source": "manual",
-    "dropbox_note": "Upload pending — DROPBOX_MCP_CREDENTIALS not configured",
+    "dropbox_note": "Upload pending \u2014 DROPBOX_MCP_CREDENTIALS not configured",
     "dropbox_paths": {
       "proposal": "/Hopkinton Proposals/Waterville36PHopkinton.pdf",
       "warranty": "/Hopkinton Proposals/Waterville36DHopkinton.pdf"
     }
+  },
+  {
+    "last_name": "Neuberger",
+    "first_name": "Jeff",
+    "email": "jeffreyneuberger@gmail.com",
+    "street_addr": "16 Windemere Road",
+    "town": "Worcester, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-20",
+    "inquiry_date": "2026-07-14",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Schott",
+    "first_name": "Steve",
+    "email": "steveschott8@gmail.com",
+    "street_addr": "8 Gaslight Lane",
+    "town": "Framingham, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-20",
+    "inquiry_date": "2026-07-19",
+    "draft_sent": false,
+    "warranty_type": "4year"
+  },
+  {
+    "last_name": "Dobbie",
+    "first_name": "Ray",
+    "email": "raydobbie@aol.com",
+    "street_addr": "23 Windemere Road",
+    "town": "Wellesley, MA",
+    "fan": "GX5A",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-20",
+    "inquiry_date": "2026-07-20",
+    "draft_sent": false,
+    "warranty_type": "4year",
+    "central": true
   }
 ]
