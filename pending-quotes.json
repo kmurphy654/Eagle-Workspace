@@ -173,5 +173,19 @@
     "draft_sent": false,
     "warranty_type": "4year",
     "central": true
+  },
+  {
+    "last_name": "Vinze",
+    "first_name": "Anika",
+    "email": "anijimhome@gmail.com",
+    "street_addr": "48 Meetinghouse Rd",
+    "town": "Norfolk, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "price": 1650,
+    "date_quoted": "2026-07-23",
+    "inquiry_date": "2026-07-23",
+    "draft_sent": false,
+    "warranty_type": "4year"
   }
 ]
