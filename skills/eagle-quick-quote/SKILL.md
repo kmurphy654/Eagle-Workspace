@@ -9,28 +9,30 @@ Kevin gives the address and the handful of facts he already knows. You build the
 Do **not** classify, hunt through Gmail, or try to figure out whether it's a good lead — Kevin
 has already decided. Just make the documents.
 
-## What Kevin has to give you (the minimum)
-- **Street address + town** (e.g. `68 Baldwin Dr, Leominster`)
+## What Kevin has to give you (all required)
+- **Street address + town** (e.g. `68 Baldwin Dr, Hampden`)
 - **Customer name** (e.g. `John Smith`)
 - **Customer email** — needed only to address the draft. If Kevin doesn't give one, still
   make the PDFs and create the draft with the To field blank; tell him it needs an address before it can send.
+- **Number of pipes / suction points** — ALWAYS. This drives the proposal wording and is never
+  assumed. If Kevin didn't say, ask "how many pipes?" before generating. (This is the `--points` value.)
+- **Warranty** — ALWAYS. `4year`, `2year`, or `none`. Never assume; if Kevin didn't say, ask which.
 
-Everything else has a default. Kevin can override any of it just by saying so in plain words
-("make it $1,850", "2 suction points", "interior system", "4-inch pipe", "2-year warranty",
-"old house"). If he doesn't mention it, use the default — don't ask.
+Pipes and warranty are not optional and have no default — if either is missing, ask for it and
+do not generate until you have both.
 
 ## Defaults (use silently unless Kevin overrides)
 | Field | Default | Override cues |
 |---|---|---|
 | Price | **$1,650** | any dollar amount he says |
 | Fan | **RP145** | "old house"/pre-2000 → **GX5A**; or he names a model |
-| Pipe | **3"** | "4 inch" (also auto-4" if he says living area > 3,500 sq ft) |
-| Suction points | **1** | "2 points", "4 points", etc. |
-| Warranty | **4year** (`4 Warranty.pdf`) | "2 year" → `2.7 WARRANTY.pdf`; "no warranty" → none |
+| Pipe size | **3"** | "4 inch" (also auto-4" if he says living area > 3,500 sq ft) |
 | System | **exterior** | "interior"/"attic fan"/"through the roof"/"add-a-fan" → interior |
 | Central | **off** | "garage with living space above" → add `--central` |
 | State | **MA** | he names another (NH, CT, …) |
 | Date | **today** (M/D/YYYY) | — |
+
+> **Number of pipes** and **warranty** are NOT in this table on purpose — they are required inputs (above), not defaults.
 
 Title-case the town everywhere (`leominster` → `Leominster`).
 
