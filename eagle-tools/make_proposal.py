@@ -28,6 +28,7 @@ p.add_argument("--out", required=True)
 p.add_argument("--central", action="store_true")
 p.add_argument("--run", default="to the exterior")
 p.add_argument("--interior", action="store_true")
+p.add_argument("--guarantee", default="4.0")
 args = p.parse_args()
 
 im = pdfium.PdfDocument(args.template)[0].render(scale=3.0).to_pil().convert("RGB")
@@ -65,7 +66,7 @@ def _pt(n):
 if args.interior:
     l1 = "Zero (0) holes will be drilled in the foundation slab for this installation."
     l2 = "Exact fan and pipe location to be determined the day of installation."
-    l3 = "System guaranteed below 4.0 pCi/L.  5-year manufacturer's warranty on fan."
+    l3 = f"System guaranteed below {args.guarantee} pCi/L.  5-year manufacturer's warranty on fan."
 elif args.points == 1:
     if args.central:
         l1 = "One (1) suction point located toward the center of the basement; pipe runs from the"
@@ -73,11 +74,11 @@ elif args.points == 1:
     else:
         l1 = "One (1) suction point; pipe runs from the hole to the exterior."
         l2 = "Exact location to be determined the day of installation."
-    l3 = "System guaranteed below 4.0 pCi/L.  5-yr warranty on fan unit."
+    l3 = f"System guaranteed below {args.guarantee} pCi/L.  5-yr warranty on fan unit."
 else:
     l1 = f"{_pt(args.points)} suction points; pipe runs from the holes, segmenting the basement slab, to the"
     l2 = "exterior. Exact locations to be determined the day of installation."
-    l3 = "System guaranteed below 4.0 pCi/L.  5-yr warranty on fan unit."
+    l3 = f"System guaranteed below {args.guarantee} pCi/L.  5-yr warranty on fan unit."
 c.drawString(95, ry(443), l1)
 c.drawString(95, ry(455), l2)
 c.drawString(95, ry(467), l3)

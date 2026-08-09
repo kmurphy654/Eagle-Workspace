@@ -130,5 +130,26 @@
       "proposal": "/Hopkinton Proposals/Waterville36PHopkinton.pdf",
       "warranty": "/Hopkinton Proposals/Waterville36DHopkinton.pdf"
     }
+  },
+  {
+    "last_name": "of record",
+    "first_name": "owner",
+    "email": "",
+    "street_addr": "68 Baldwin Dr",
+    "town": "Hampden, MA",
+    "fan": "RP145",
+    "pipe": "3",
+    "points": 1,
+    "price": 1550,
+    "date_quoted": "2026-08-09",
+    "draft_sent": false,
+    "warranty_type": "2year",
+    "guarantee": "2.7",
+    "source": "manual",
+    "dropbox_note": "Not uploaded — Dropbox MCP connector only supports creating plain-text files, not binary PDF uploads. PDFs delivered directly to Kevin to file manually.",
+    "dropbox_paths": {
+      "proposal": "/Hampden Proposals/BaldwinDr68PHampden.pdf",
+      "warranty": "/Hampden Proposals/BaldwinDr68DHampden.pdf"
+    }
   }
 ]
