@@ -21,6 +21,30 @@ has already decided. Just make the documents.
 Pipes and warranty are not optional and have no default — if either is missing, ask for it and
 do not generate until you have both.
 
+## Prompting Kevin through it (when info is missing)
+Kevin will often type a short sentence and leave things out. Don't fail and don't assume —
+**walk him through the gaps in one friendly pass**, then confirm before building.
+
+1. **Parse whatever he gave** and figure out what's still missing from the required set:
+   address, customer name, email, **# of pipes**, **warranty**. (Price is not required — it
+   defaults to $1,650, but confirm it in the recap.)
+2. **Ask for everything missing in ONE message**, as a short numbered list — don't drip one
+   question at a time. Example:
+   > Got 68 Baldwin Dr, Hampden for John Smith. Before I build it I need:
+   > 1. Customer email?
+   > 2. How many pipes (suction points)?
+   > 3. Warranty — 4‑year, 2‑year, or none?
+   > 4. Price — or should I use the standard $1,650?
+3. If he answers only some, ask again for just the ones still open. Keep it brief.
+4. **Recap and confirm before generating.** One line back to him:
+   > Building: 68 Baldwin Dr, Hampden MA · John Smith <jsmith@gmail.com> · $1,650 · 2 pipes · 4‑yr warranty · exterior RP145 3". Go?
+   Wait for his "yes/go" (or a correction) before running any scripts. If he corrects a field,
+   re-recap the changed line and confirm.
+5. Only after confirmation, run STEPS 1–7 below.
+
+Keep the tone quick and plain — Kevin is doing these between jobs. Never lecture, never re-ask
+for something he already gave.
+
 ## Defaults (use silently unless Kevin overrides)
 | Field | Default | Override cues |
 |---|---|---|
