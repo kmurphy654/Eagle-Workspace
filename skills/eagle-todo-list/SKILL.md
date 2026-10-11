@@ -103,7 +103,7 @@ Many customers answer by text, not email. If this session has computer-use tools
   "Texts not checked. Check Messages before calling anyone marked No reply yet."
 
 ### 3. Google Calendar (primary)
-List about the next three weeks. Event titles follow
+List the **past two weeks and the next three weeks**. A request whose job already happened (a past event at the same address) is done, even if the email thread still looks open; take it off and log it. Event titles follow
 `<Tech> <D|J|S> <Town> <Street> … HO <name> <phone> … $<price> confirmed with check`,
 where D is an estimate, J an install and S a service call. Estimators are Bryan and
 Vince; installers are Bob, Abijai and Vince.
