@@ -1,6 +1,6 @@
 ---
 name: eagle-todo-list
-description: Refresh and show Kevin's Eagle Environmental to-do list, the printable Claude Doc "Eagle To-Do List", grouped into the same sections every time and brought up to date from Gmail, Google Calendar, Dropbox and Kevin's own checkmarks in the doc. Use whenever the user says "to-do list", "todo list", "show me the list", "update the list", or asks what Kevin needs to work on. Always show the WHOLE list, never just what changed.
+description: Refresh and show Kevin's Eagle Environmental to-do list, the printable Claude Doc "Eagle To-Do List", grouped into the same sections every time and brought up to date from Gmail, Google Calendar, Dropbox and Kevin's own checkmarks in the doc. Use whenever the user says "to-do list", "todo list", "show me the list", "update the list", or asks what Kevin needs to work on. Also use it for "check texts" / "any texts for the list?" (text-only check, see step 2b). Always show the WHOLE list, never just what changed.
 ---
 
 # Eagle Environmental: To-Do List
@@ -95,6 +95,10 @@ Many customers answer by text, not email. If this session has computer-use tools
   goes in section 7. Write "(by text 10/12)" in the row so Kevin knows where it came from.
 - Texts from unknown numbers that look like new leads ("radon quote", an address) go in
   **Call first** with the number.
+- **Text-only check:** when the user just says "check texts" (or similar), do only this
+  step: scan Messages since the list was last prepared, add or update the rows it finds
+  (and log anything that is done), re-export the PDF, and show what changed plus the
+  whole list as usual.
 - If there are no computer-use tools, skip this step and add one line under section 1:
   "Texts not checked. Check Messages before calling anyone marked No reply yet."
 
