@@ -79,6 +79,25 @@ replies included.
 - Skip newsletters, Toll "Tailgate Talk", QuickBooks receipts and AccuStar lab reports.
   The lab reports go to a label automatically and the client is copied on them.
 
+### 2b. Kevin's texts (only when computer use on his Mac is available)
+Many customers answer by text, not email. If this session has computer-use tools
+(`mcp__computer-use__*`, or `mcp__remote-devices__computer_*` / an
+`enable__mcp__remote-devices__computer` tool), check Messages on Kevin's Mac after Gmail:
+- Request access to **Messages** only (one app). Read-only: never send, reply to, or
+  delete a text, and never click links inside texts.
+- Look at the conversation list for texts since the list was last prepared. Match
+  senders by name or by the phone numbers on the list (section rows and calendar events
+  carry phone numbers).
+- For every person in **Call first** or **Waiting on the customer**, plus anyone marked
+  "No reply yet", search Messages for their name or number and read the latest few texts.
+- Treat a text the same as an email: a customer text with no answer from Kevin goes in
+  **Call first**; a text that confirms a date means booked (check the calendar); a no
+  goes in section 7. Write "(by text 10/12)" in the row so Kevin knows where it came from.
+- Texts from unknown numbers that look like new leads ("radon quote", an address) go in
+  **Call first** with the number.
+- If there are no computer-use tools, skip this step and add one line under section 1:
+  "Texts not checked. Check Messages before calling anyone marked No reply yet."
+
 ### 3. Google Calendar (primary)
 List about the next three weeks. Event titles follow
 `<Tech> <D|J|S> <Town> <Street> … HO <name> <phone> … $<price> confirmed with check`,
