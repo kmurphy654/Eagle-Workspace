@@ -111,10 +111,24 @@ example `SouthSt596` in title-only mode. When the file is there, the row is done
 
 ### 6. Show it
 - Open the doc with the Artifact tool (`action: "open"`) and give the viewer link.
+- The link only opens for the claude.ai account that owns the doc, so Kevin can't open it
+  signed in with his own account. Every time, also export the tab as a letter-size PDF
+  (`mcp__Claude_Docs__export`, `format: "pdf"`), decode `data.bytes_b64` into
+  `printouts/Eagle To-Do List <YYYY-MM-DD>.pdf`, and send that file to the user so Kevin can
+  print it.
 - In chat, list **every open item in every section**: one short line per person or task,
   grouped under the section names. The web quote section can be a compact
   "Name (Town)" list. Always show the whole list, not just the changes. After that, add
   a short "Changed since last time" note.
+
+## "Still interested?" emails for old web requests
+When asked, go through the **Inbox** web quote requests (subject "New Request For Quote!")
+that are more than 14 days old. Skip anyone Kevin has already emailed or who has a visit on
+the calendar. **Never include fan replacement requests** ("New Fan Replacement Request");
+those belong in section 2. Draft one email per person with the subject
+"Still interested in a radon quote for <address>, <town>?", using the same wording as the
+9/27 batch. Leave them as drafts until the user says to send. Once they are sent, file them
+in the "A REQUEST FOR QUOTE" label.
 
 ## Standing rules from Kevin
 - Customer emails are **drafts first**. Never send a customer email unless told to.
