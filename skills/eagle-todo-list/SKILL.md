@@ -1,6 +1,6 @@
 ---
 name: eagle-todo-list
-description: Refresh and show Kevin's Eagle Environmental to-do list, the printable Claude Doc "Eagle To-Do List", grouped into the same sections every time and brought up to date from Gmail, Google Calendar, Dropbox and Kevin's own checkmarks in the doc. Use whenever the user says "to-do list", "todo list", "show me the list", "update the list", or asks what Kevin needs to work on. Also use it for "check texts" / "any texts for the list?" (text-only check, see step 2b). Always show the WHOLE list, never just what changed.
+description: Refresh and show Kevin's Eagle Environmental to-do list, the printable Claude Doc "Eagle To-Do List", grouped into the same sections every time and brought up to date from Gmail, Kevin's texts, Google Calendar, Dropbox and Kevin's own checkmarks in the doc. Use whenever the user says "to-do list", "todo list", "show me the list", "update the list", or asks what Kevin needs to work on. Also use it for "check texts" / "any texts for the list?" (text-only check, see step 2b). Always show the WHOLE list, never just what changed.
 ---
 
 # Eagle Environmental: To-Do List
@@ -79,31 +79,56 @@ replies included.
 - Skip newsletters, Toll "Tailgate Talk", QuickBooks receipts and AccuStar lab reports.
   The lab reports go to a label automatically and the client is copied on them.
 
-### 2b. Kevin's texts (only when computer use on his Mac is available)
-Many customers answer by text, not email. If this session has computer-use tools
-(`mcp__computer-use__*`, or `mcp__remote-devices__computer_*` / an
-`enable__mcp__remote-devices__computer` tool), check Messages on Kevin's Mac after Gmail:
-- Request access to **Messages** only (one app). Read-only: never send, reply to, or
-  delete a text, and never click links inside texts.
-- Look at the conversation list for texts since the list was last prepared. Match
-  senders by name or by the phone numbers on the list (section rows and calendar events
-  carry phone numbers).
-- For every person in **Call first** or **Waiting on the customer**, plus anyone marked
-  "No reply yet", search Messages for their name or number and read the latest few texts.
+### 2b. Kevin's texts
+Many customers answer by text, not email. Check texts after Gmail, using the first of
+these that works. Always read-only: never send, reply to, or delete a text, and never open
+links inside texts.
+
+**A. Direct Messages connector (when running in the Claude desktop app on Kevin's Mac).**
+If `mcp__Read_and_Send_iMessages__read_imessages` is available (load it with ToolSearch),
+use it. It takes a phone number like `781-392-6181` and returns the latest texts with
+`date`, `is_from_me` and `content`; an empty list means no texts with that number.
+- Call it (limit 6) for every phone number in **Call first**, **Waiting on the customer**
+  and **New web quote requests, no reply yet**.
+- Also call `get_unread_imessages` (limit 30) to catch texts from numbers not on the list
+  that look like new leads (radon, a quote, a test result, an address).
+- Never call `send_imessage`.
+
+**B. The Dropbox text file (when running in the cloud on claude.ai).**
+The cloud can't see Kevin's Mac, so his Mac writes a status file to Dropbox:
+`/Eagle Text Status.md`. Read it with the Dropbox connector (`fetch`). Check the
+"Updated:" line: if it is from today or yesterday, use it. If it is older, or it says
+"TEXT CHECK FAILED", treat texts as not checked (D below) and mention the date.
+
+**C. Computer use.** If neither A nor B works but computer-use tools are available
+(`mcp__computer-use__*`, `mcp__remote-devices__computer_*`, or an
+`enable__mcp__remote-devices__computer` tool), request access to **Messages** only and
+search it for the names and numbers above.
+
+**What to do with what you find** (any method):
 - Treat a text the same as an email: a customer text with no answer from Kevin goes in
-  **Call first**; a text that confirms a date means booked (check the calendar); a no
-  goes in section 7. Write "(by text 10/12)" in the row so Kevin knows where it came from.
-- Texts from unknown numbers that look like new leads ("radon quote", an address) go in
-  **Call first** with the number.
+  **Call first**; if Kevin texted last, it goes in **Waiting on the customer**; a text that
+  confirms a date means booked (check the calendar); a no goes in section 7.
+- Anyone in "No reply yet" who has texted with Kevin comes out of that section.
+- Write "(by text 10/12)" in the row so Kevin knows where it came from.
+- Texts from unknown numbers that look like new leads go in **Call first** with the number.
 - **Text-only check:** when the user just says "check texts" (or similar), do only this
-  step: scan Messages since the list was last prepared, add or update the rows it finds
+  step: check texts since the list was last prepared, add or update the rows it finds
   (and log anything that is done), re-export the PDF, and show what changed plus the
   whole list as usual.
-- If there are no computer-use tools, skip this step and add one line under section 1:
-  "Texts not checked. Check Messages before calling anyone marked No reply yet."
+
+**D. Nothing worked.** Add one line under section 1: "Texts not checked. Check Messages
+before calling anyone marked No reply yet."
 
 ### 3. Google Calendar (primary)
-List the **past two weeks and the next three weeks**. A request whose job already happened (a past event at the same address) is done, even if the email thread still looks open; take it off and log it. Event titles follow
+List the **past two weeks and the next three weeks**.
+- **Address check for every open row (sections 1, 2, 4 and 5):** search the calendar for the
+  row's street address (number + street) and phone number. A past event at that address
+  means the visit or job already happened. That holds even when the email or text thread
+  still looks open, because Kevin often books by phone and never writes back. Take the row
+  off, log it in section 7 ("done 10/8, Abijai"), and don't re-add it from an older email
+  on the next refresh. Service rows (fan swaps, warranty fans) are the most likely to be
+  missed this way. Event titles follow
 `<Tech> <D|J|S> <Town> <Street> … HO <name> <phone> … $<price> confirmed with check`,
 where D is an estimate, J an install and S a service call. Estimators are Bryan and
 Vince; installers are Bob, Abijai and Vince.
