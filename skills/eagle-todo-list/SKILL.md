@@ -127,8 +127,10 @@ that are more than 14 days old. Skip anyone Kevin has already emailed or who has
 the calendar. **Never include fan replacement requests** ("New Fan Replacement Request");
 those belong in section 2. Draft one email per person with the subject
 "Still interested in a radon quote for <address>, <town>?", using the same wording as the
-9/27 batch. Leave them as drafts until the user says to send. Once they are sent, file them
-in the "A REQUEST FOR QUOTE" label.
+9/27 batch. Leave them as drafts until the user says to send. Once they are sent, file the
+sent emails in the "A REQUEST FOR QUOTE" label, **and also move each person's original
+web-form email ("New Request For Quote!") out of the Inbox into that same label** (add the
+label, remove INBOX). Anyone Kevin has emailed should no longer sit in the Inbox.
 
 ## Standing rules from Kevin
 - Customer emails are **drafts first**. Never send a customer email unless told to.
