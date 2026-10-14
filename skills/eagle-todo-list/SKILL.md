@@ -160,10 +160,18 @@ example `SouthSt596` in title-only mode. When the file is there, the row is done
 ### 6. Show it
 - Open the doc with the Artifact tool (`action: "open"`) and give the viewer link.
 - The link only opens for the claude.ai account that owns the doc, so Kevin can't open it
-  signed in with his own account. Every time, also export the tab as a letter-size PDF
-  (`mcp__Claude_Docs__export`, `format: "pdf"`), decode `data.bytes_b64` into
-  `printouts/Eagle To-Do List <YYYY-MM-DD>.pdf`, and send that file to the user so Kevin can
-  print it.
+  signed in with his own account. Every time, also make a **compact printable PDF** and send
+  it to the user so Kevin can print it:
+  - Preferred (when this session can run code): read the doc body (`mcp__Claude_Docs__read`,
+    it is saved to a file) and run
+    `python3 eagle-tools/print_todo.py <that saved file> "printouts/Eagle To-Do List <YYYY-MM-DD>.pdf"`
+    (in the Eagle-Workspace repo). It prints small type and tight tables, shortens long notes
+    to about 140 characters, shows phone numbers instead of emails, lays the web quotes out
+    two to a line, and leaves the "Already done" log out. It comes to about 3 pages instead
+    of 12.
+  - Fallback (no code execution): export the tab as a letter-size PDF
+    (`mcp__Claude_Docs__export`, `format: "pdf"`) and decode `data.bytes_b64`. That copy is
+    much longer, so keep the notes in the doc short.
 - In chat, list **every open item in every section**: one short line per person or task,
   grouped under the section names. The web quote section can be a compact
   "Name (Town)" list. Always show the whole list, not just the changes. After that, add
