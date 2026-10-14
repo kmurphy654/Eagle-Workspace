@@ -161,17 +161,19 @@ example `SouthSt596` in title-only mode. When the file is there, the row is done
 - Open the doc with the Artifact tool (`action: "open"`) and give the viewer link.
 - The link only opens for the claude.ai account that owns the doc, so Kevin can't open it
   signed in with his own account. Every time, also make a **compact printable PDF** and send
-  it to the user so Kevin can print it:
-  - Preferred (when this session can run code): read the doc body (`mcp__Claude_Docs__read`,
-    it is saved to a file) and run
-    `python3 eagle-tools/print_todo.py <that saved file> "printouts/Eagle To-Do List <YYYY-MM-DD>.pdf"`
-    (in the Eagle-Workspace repo). It prints small type and tight tables, shortens long notes
-    to about 140 characters, shows phone numbers instead of emails, lays the web quotes out
-    two to a line, and leaves the "Already done" log out. It comes to about 3 pages instead
-    of 12.
-  - Fallback (no code execution): export the tab as a letter-size PDF
-    (`mcp__Claude_Docs__export`, `format: "pdf"`) and decode `data.bytes_b64`. That copy is
-    much longer, so keep the notes in the doc short.
+  it to the user so Kevin can print it. Use the Docs exporter for the PDF (PDFs made any
+  other way don't preview or print in Kevin's app):
+  - The print copy is a second doc, **"Eagle To-Do List (Print)"**,
+    https://claude.ai/code/artifact/01877d7f-98b5-495d-b42b-2dcb5b8b421b (one tab,
+    body node `cb075d52-e2b9`, file `772de7a7-474f`). After each refresh, rewrite it from the
+    main list: title + prepared line, then each of sections 1–6 as a heading with a count and
+    a `- [ ]` checklist (no tables; tables print as narrow columns and run 10+ pages).
+    One line per item: **Name** · address · phone — short note (about 12 words, keep the
+    action). Web quotes and old estimates: just name, town, phone. Leave out section 7.
+  - Export that doc's tab (`mcp__Claude_Docs__export`, `format: "pdf"`, `paper: "letter"`),
+    decode `data.bytes_b64` into `printouts/Eagle To-Do List <date>.pdf` and send it with
+    `display: "attach"`. It comes to about 5 pages. Send files from the repo root as the
+    working directory, or the app may not open them.
 - In chat, list **every open item in every section**: one short line per person or task,
   grouped under the section names. The web quote section can be a compact
   "Name (Town)" list. Always show the whole list, not just the changes. After that, add
